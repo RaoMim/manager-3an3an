@@ -1,0 +1,52 @@
+# Flutter
+build/
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+.metadata
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Android
+android/app/build/
+android/.gradle/
+android/gradle/
+android/gradlew
+android/gradlew.bat
+android/local.properties
+android/app/src/main/kotlin/
+android/key.properties
+
+# iOS
+ios/Flutter/
+ios/Pods/
+ios/Podfile.lock
+ios/.symlinks/
+ios/Flutter/flutter_export_environment.sh
+
+# IDE
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Sensitive files
+*.keystore
+*.jks
+google-services.json.bak
+GoogleService-Info.plist.bak
+
+# Logs
+*.log
+
