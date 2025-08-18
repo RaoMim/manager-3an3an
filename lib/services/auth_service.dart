@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/api_response.dart';
@@ -75,7 +76,9 @@ class AuthService {
             await FirebaseNotificationsHelper().sendTokenToBackend(authResponse.token!);
           } catch (e) {
             // Don't fail login if FCM registration fails
-            print('Failed to register FCM token: $e');
+            if (kDebugMode) {
+              print('Failed to register FCM token: $e');
+            }
           }
           
           return authResponse;

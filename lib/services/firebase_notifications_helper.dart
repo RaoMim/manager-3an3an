@@ -139,19 +139,29 @@ class FirebaseNotificationsHelper {
 
   /// Get FCM token
   Future<String?> _getFCMToken() async {
-    if (_messaging == null) return null;
+    if (_messaging == null) {
+      if (kDebugMode) {
+        print("ERROR: Firebase messaging is null");
+      }
+      return null;
+    }
 
     try {
       _fcmToken = await _messaging!.getToken();
+      
       if (kDebugMode) {
-        print("FCM Token: $_fcmToken");
+        if (_fcmToken != null) {
+          print("FCM Token generated successfully (${_fcmToken!.length} chars)");
+        } else {
+          print("WARNING: FCM token is null");
+        }
       }
       
       // Listen for token refresh
       _messaging!.onTokenRefresh.listen((String token) {
         _fcmToken = token;
         if (kDebugMode) {
-          print("FCM Token refreshed: $token");
+          print("FCM Token refreshed");
         }
         // You might want to send this token to your backend here
       });
@@ -159,7 +169,7 @@ class FirebaseNotificationsHelper {
       return _fcmToken;
     } catch (e) {
       if (kDebugMode) {
-        print("Error getting FCM token: $e");
+        print("ERROR getting FCM token: $e");
       }
       return null;
     }
@@ -373,10 +383,20 @@ class FirebaseNotificationsHelper {
 
   /// Send FCM token to backend (call this after successful login)
   Future<void> sendTokenToBackend(String authToken) async {
-    if (_fcmToken == null) return;
+    if (_fcmToken == null) {
+      if (kDebugMode) {
+        print("WARNING: FCM token is null, cannot send to backend");
+      }
+      return;
+    }
 
     try {
-      final response = await http.post(
+      if (kDebugMode) {
+        print("Sending FCM token to backend...");
+        print("Platform: ${Platform.isIOS ? 'ios' : 'android'}");
+      }
+      
+      final response = await http.put(
         Uri.parse('https://akl.3an3an.ma/api/Manager/fcm-token'),
         headers: {
           'Authorization': 'Bearer $authToken',
@@ -391,16 +411,16 @@ class FirebaseNotificationsHelper {
 
       if (response.statusCode == 200) {
         if (kDebugMode) {
-          print("FCM token sent successfully to backend");
+          print("SUCCESS: FCM token sent successfully to backend");
         }
       } else {
         if (kDebugMode) {
-          print("Failed to send FCM token: ${response.statusCode} - ${response.body}");
+          print("FAILED to send FCM token: ${response.statusCode} - ${response.body}");
         }
       }
     } catch (e) {
       if (kDebugMode) {
-        print("Error sending FCM token to backend: $e");
+        print("ERROR sending FCM token to backend: $e");
       }
     }
   }
