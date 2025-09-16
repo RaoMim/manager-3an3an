@@ -12,7 +12,7 @@ import 'models/order.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  print("🚀 MAIN: App starting, Firebase will be initialized later...");
+  print("🚀 MAIN: App starting, Firebase will be initialized later..."); // Updated
   
   runApp(const Manager3an3anApp());
 }

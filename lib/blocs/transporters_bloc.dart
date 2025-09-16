@@ -120,16 +120,37 @@ class TransportersBloc extends Bloc<TransportersEvent, TransportersState> {
       final nextPage = loadedState.currentPage + 1;
       final filter = loadedState.filter;
 
+      String? status;
+      int? cityId;
+      bool? isBlocked;
+      bool? availableOnly;
+      String? search;
+      double? minRating;
+      int? minDeliveries;
+      
+      filter.when(
+        (filterStatus, filterCityId, filterIsBlocked, filterAvailableOnly, filterSearch, filterMinRating, filterMinDeliveries, filterOnlineOnly, filterTopRatedOnly, filterLatitude, filterLongitude, filterMaxDistanceKm) {
+          status = filterStatus;
+          cityId = filterCityId;
+          isBlocked = filterIsBlocked;
+          availableOnly = filterAvailableOnly;
+          search = filterSearch;
+          minRating = filterMinRating;
+          minDeliveries = filterMinDeliveries;
+        },
+        empty: () {},
+      );
+
       final response = await _transporterService.getTransporters(
         page: nextPage,
         pageSize: loadedState.pageSize,
-        status: filter.status,
-        cityId: filter.cityId,
-        isBlocked: filter.isBlocked,
-        availableOnly: filter.availableOnly,
-        search: filter.search,
-        minRating: filter.minRating,
-        minDeliveries: filter.minDeliveries,
+        status: status,
+        cityId: cityId,
+        isBlocked: isBlocked,
+        availableOnly: availableOnly,
+        search: search,
+        minRating: minRating,
+        minDeliveries: minDeliveries,
       );
 
       if (response.isSuccess && response.data != null) {
@@ -167,16 +188,37 @@ class TransportersBloc extends Bloc<TransportersEvent, TransportersState> {
   Future<void> _onRefreshTransporters(RefreshTransportersEvent event, Emitter<TransportersState> emit) async {
     if (state is TransportersLoaded) {
       final loadedState = state as TransportersLoaded;
+      String? status;
+      int? cityId;
+      bool? isBlocked;
+      bool? availableOnly;
+      String? search;
+      double? minRating;
+      int? minDeliveries;
+      
+      loadedState.filter.when(
+        (filterStatus, filterCityId, filterIsBlocked, filterAvailableOnly, filterSearch, filterMinRating, filterMinDeliveries, filterOnlineOnly, filterTopRatedOnly, filterLatitude, filterLongitude, filterMaxDistanceKm) {
+          status = filterStatus;
+          cityId = filterCityId;
+          isBlocked = filterIsBlocked;
+          availableOnly = filterAvailableOnly;
+          search = filterSearch;
+          minRating = filterMinRating;
+          minDeliveries = filterMinDeliveries;
+        },
+        empty: () {},
+      );
+      
       add(TransportersEvent.loadTransporters(
         page: 1,
         pageSize: loadedState.pageSize,
-        status: loadedState.filter.status,
-        cityId: loadedState.filter.cityId,
-        isBlocked: loadedState.filter.isBlocked,
-        availableOnly: loadedState.filter.availableOnly,
-        search: loadedState.filter.search,
-        minRating: loadedState.filter.minRating,
-        minDeliveries: loadedState.filter.minDeliveries,
+        status: status,
+        cityId: cityId,
+        isBlocked: isBlocked,
+        availableOnly: availableOnly,
+        search: search,
+        minRating: minRating,
+        minDeliveries: minDeliveries,
         isRefresh: true,
       ));
     } else {

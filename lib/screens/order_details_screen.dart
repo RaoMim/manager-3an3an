@@ -1,17 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../models/order.dart';
 import '../models/transporter.dart';
-import '../blocs/orders_bloc.dart';
-import '../blocs/orders_event.dart';
-import '../blocs/orders_state.dart';
-import '../blocs/transporters_bloc.dart';
-import '../blocs/transporters_event.dart';
-import '../widgets/transporter_assignment_modal.dart';
+import '../services/orders_service.dart';
 import '../services/signalr_initializer.dart';
 import '../services/phone_service.dart';
+import '../widgets/transporter_assignment_modal.dart';
 
 /// Enhanced order details screen with Material Design 3 and comprehensive admin actions
 class OrderDetailsScreen extends StatefulWidget {
@@ -29,6 +24,7 @@ class OrderDetailsScreen extends StatefulWidget {
 class _OrderDetailsScreenState extends State<OrderDetailsScreen>
     with TickerProviderStateMixin, SignalRConnectionMixin {
   
+  final OrdersService _ordersService = OrdersService();
   late TabController _tabController;
   late Order _currentOrder;
   bool _isLoading = false;
@@ -41,34 +37,46 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
     _initializeData();
   }
 
-  void _initializeData() {
+  void _initializeData() async {
     // Ensure SignalR connection for real-time updates
     ensureSignalRConnection();
     
-    // Refresh order data
-    context.read<OrdersBloc>().add(
-      OrdersEvent.getOrderById(orderId: _currentOrder.id),
-    );
+    // Refresh order data using service
+    try {
+      setState(() => _isLoading = true);
+      final response = await _ordersService.getOrderById(_currentOrder.id);
+      if (response.isSuccess && response.data != null && mounted) {
+        setState(() {
+          _currentOrder = response.data!;
+          _isLoading = false;
+        });
+      } else {
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    return BlocListener<OrdersBloc, OrdersState>(
-      listener: _handleOrdersStateChanges,
-      child: Scaffold(
-        backgroundColor: theme.colorScheme.surfaceContainerLowest,
-        body: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) => [
-            _buildSliverAppBar(context, theme, innerBoxIsScrolled),
-          ],
-          body: _buildBody(context, theme),
-        ),
-        bottomNavigationBar: _buildBottomActionBar(context, theme),
-        floatingActionButton: _buildFloatingActionButton(context, theme),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+    return Scaffold(
+      backgroundColor: theme.colorScheme.surfaceContainerLowest,
+      body: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) => [
+          _buildSliverAppBar(context, theme, innerBoxIsScrolled),
+        ],
+        body: _buildBody(context, theme),
       ),
+      bottomNavigationBar: _buildBottomActionBar(context, theme),
+      floatingActionButton: _buildFloatingActionButton(context, theme),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     );
   }
 
@@ -146,7 +154,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                 ],
               ),
             ),
-            if (_currentOrder.trackingCode.isNotEmpty)
+            if (_currentOrder.trackingCode?.isNotEmpty == true)
               PopupMenuItem(
                 value: 'copy_tracking',
                 child: Row(
@@ -290,9 +298,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
             const SizedBox(height: 16),
             
             // Transporter Information (if assigned)
-            if (_currentOrder.transporter != null)
+            if (_currentOrder.hasTransporter)
               _buildTransporterCard(context, theme),
-            if (_currentOrder.transporter != null)
+            if (_currentOrder.hasTransporter)
               const SizedBox(height: 16),
             
             // Order Items
@@ -371,11 +379,14 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                   ),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  'Informations client',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurface,
+                Expanded(
+                  child: Text(
+                    'Informations client',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -442,11 +453,14 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                   ),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  'Informations de livraison',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurface,
+                Expanded(
+                  child: Text(
+                    'Informations de livraison',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -458,7 +472,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
               theme,
               icon: Icons.location_city,
               label: 'Ville',
-              value: _currentOrder.city?.name ?? 'Non spécifiée',
+              value: _currentOrder.city?['name'] ?? 'Non spécifiée',
             ),
             
             const SizedBox(height: 12),
@@ -468,9 +482,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
               theme,
               icon: Icons.map,
               label: 'Adresse',
-              value: _currentOrder.address,
+              value: _currentOrder.address ?? 'Non spécifiée',
               maxLines: 3,
-              onTap: () => _copyToClipboard(_currentOrder.address, 'Adresse'),
+              onTap: _currentOrder.address != null ? () => _copyToClipboard(_currentOrder.address!, 'Adresse') : null,
             ),
             
             if (_currentOrder.latitude != null && _currentOrder.longitude != null) ...[
@@ -499,7 +513,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
   }
 
   Widget _buildTransporterCard(BuildContext context, ThemeData theme) {
-    final transporter = _currentOrder.transporter!;
+    final transporterId = _currentOrder.transporterId!;
+    final transporterName = _currentOrder.transporterName ?? 'Inconnu';
+    final transporterPhone = _currentOrder.transporterPhone;
     
     return Card(
       elevation: 0,
@@ -521,7 +537,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                   radius: 24,
                   backgroundColor: theme.colorScheme.tertiary,
                   child: Text(
-                    transporter.name[0].toUpperCase(),
+                    transporterName[0].toUpperCase(),
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: theme.colorScheme.onTertiary,
                       fontWeight: FontWeight.w600,
@@ -541,7 +557,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                         ),
                       ),
                       Text(
-                        transporter.name,
+                        transporterName,
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w700,
                           color: theme.colorScheme.onSurface,
@@ -550,20 +566,21 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                     ],
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: transporter.isOnline ? Colors.green : Colors.grey,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    transporter.isOnline ? 'En ligne' : 'Hors ligne',
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
+                if (transporterPhone != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      'Assigné',
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: theme.colorScheme.onPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -574,27 +591,27 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                   child: _buildTransporterStat(
                     context,
                     theme,
-                    'Note',
-                    '${transporter.rating.toStringAsFixed(1)}⭐',
-                    Icons.star,
+                    'ID',
+                    transporterId.toString(),
+                    Icons.badge,
                   ),
                 ),
                 Expanded(
                   child: _buildTransporterStat(
                     context,
                     theme,
-                    'Livraisons',
-                    transporter.totalDeliveries.toString(),
-                    Icons.local_shipping,
+                    'Téléphone',
+                    transporterPhone ?? 'N/A',
+                    Icons.phone,
                   ),
                 ),
                 Expanded(
                   child: _buildTransporterStat(
                     context,
                     theme,
-                    'Commission',
-                    '${transporter.commission.toStringAsFixed(1)}%',
-                    Icons.percent,
+                    'Statut',
+                    _currentOrder.transporterStatus ?? 'N/A',
+                    Icons.info,
                   ),
                 ),
               ],
@@ -605,10 +622,16 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
             Row(
               children: [
                 Expanded(
-                  child: FilledButton.icon(
-                    onPressed: () => _makePhoneCall(transporter.phone),
-                    icon: const Icon(Icons.call),
-                    label: const Text('Appeler'),
+                  child: FilledButton(
+                    onPressed: transporterPhone != null ? () => _makePhoneCall(transporterPhone!) : null,
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.call),
+                        SizedBox(width: 8),
+                        Text('Appeler'),
+                      ],
+                    ),
                     style: FilledButton.styleFrom(
                       backgroundColor: theme.colorScheme.tertiary,
                       foregroundColor: theme.colorScheme.onTertiary,
@@ -619,8 +642,14 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                 Expanded(
                   child: FilledButton.tonal(
                     onPressed: () => _changeTransporter(),
-                    icon: const Icon(Icons.swap_horiz),
-                    label: const Text('Changer'),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.swap_horiz),
+                        SizedBox(width: 8),
+                        Text('Changer'),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -690,14 +719,16 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                   ),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  'Articles commandés',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurface,
+                Expanded(
+                  child: Text(
+                    'Articles commandés',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const Spacer(),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
@@ -852,11 +883,14 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                   ),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  'Résumé financier',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurface,
+                Expanded(
+                  child: Text(
+                    'Résumé financier',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -866,26 +900,26 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
             _buildSummaryRow(
               theme,
               'Sous-total',
-              '${_currentOrder.subtotalAmount.toStringAsFixed(2)} DH',
+              '${(_currentOrder.subtotalAmount ?? 0).toStringAsFixed(2)} DH',
               false,
             ),
             
-            if (_currentOrder.deliveryFee > 0) ...[
+            if ((_currentOrder.deliveryFee ?? 0) > 0) ...[
               const SizedBox(height: 12),
               _buildSummaryRow(
                 theme,
                 'Frais de livraison',
-                '${_currentOrder.deliveryFee.toStringAsFixed(2)} DH',
+                '${(_currentOrder.deliveryFee ?? 0).toStringAsFixed(2)} DH',
                 false,
               ),
             ],
             
-            if (_currentOrder.discount > 0) ...[
+            if ((_currentOrder.discount ?? 0) > 0) ...[
               const SizedBox(height: 12),
               _buildSummaryRow(
                 theme,
                 'Remise',
-                '-${_currentOrder.discount.toStringAsFixed(2)} DH',
+                '-${(_currentOrder.discount ?? 0).toStringAsFixed(2)} DH',
                 false,
                 isDiscount: true,
               ),
@@ -974,11 +1008,14 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                   ),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  'Informations techniques',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurface,
+                Expanded(
+                  child: Text(
+                    'Informations techniques',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -994,15 +1031,15 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
               onTap: () => _copyToClipboard(_currentOrder.id.toString(), 'ID de commande'),
             ),
             
-            if (_currentOrder.trackingCode.isNotEmpty) ...[
+            if (_currentOrder.trackingCode?.isNotEmpty == true) ...[
               const SizedBox(height: 12),
               _buildInfoTile(
                 context,
                 theme,
                 icon: Icons.qr_code,
                 label: 'Code de suivi',
-                value: _currentOrder.trackingCode,
-                onTap: () => _copyToClipboard(_currentOrder.trackingCode, 'Code de suivi'),
+                value: _currentOrder.trackingCode ?? 'N/A',
+                onTap: _currentOrder.trackingCode != null ? () => _copyToClipboard(_currentOrder.trackingCode!, 'Code de suivi') : null,
               ),
             ],
             
@@ -1060,11 +1097,14 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                   ),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  'Historique de la commande',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurface,
+                Expanded(
+                  child: Text(
+                    'Historique de la commande',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -1186,18 +1226,40 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
             Row(
               children: [
                 Expanded(
-                  child: FilledButton.icon(
+                  child: FilledButton(
                     onPressed: () => _makePhoneCall(_currentOrder.clientPhone),
-                    icon: const Icon(Icons.call),
-                    label: const Text('Appeler client'),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.call, size: 18),
+                        SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            'Appeler',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: FilledButton.tonal.icon(
+                  child: FilledButton.tonal(
                     onPressed: _sendSMS,
-                    icon: const Icon(Icons.sms),
-                    label: const Text('Envoyer SMS'),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.sms, size: 18),
+                        SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            'SMS',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -1208,18 +1270,30 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
             Row(
               children: [
                 Expanded(
-                  child: FilledButton.tonal.icon(
+                  child: FilledButton.tonal(
                     onPressed: _openInMaps,
-                    icon: const Icon(Icons.map),
-                    label: const Text('Ouvrir Maps'),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.map),
+                        SizedBox(width: 8),
+                        Text('Ouvrir Maps'),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: FilledButton.tonal.icon(
+                  child: FilledButton.tonal(
                     onPressed: _shareOrder,
-                    icon: const Icon(Icons.share),
-                    label: const Text('Partager'),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.share),
+                        SizedBox(width: 8),
+                        Text('Partager'),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -1298,22 +1372,34 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
             if (_currentOrder.canAssign) ...[
               SizedBox(
                 width: double.infinity,
-                child: FilledButton.icon(
+                child: FilledButton(
                   onPressed: _assignTransporter,
-                  icon: const Icon(Icons.person_add),
-                  label: const Text('Assigner un transporteur'),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.person_add),
+                      SizedBox(width: 8),
+                      Text('Assigner un transporteur'),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
             ],
             
-            if (_currentOrder.transporter != null) ...[
+            if (_currentOrder.hasTransporter) ...[
               SizedBox(
                 width: double.infinity,
-                child: FilledButton.tonal.icon(
+                child: FilledButton.tonal(
                   onPressed: _changeTransporter,
-                  icon: const Icon(Icons.swap_horiz),
-                  label: const Text('Changer le transporteur'),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.swap_horiz),
+                      SizedBox(width: 8),
+                      Text('Changer le transporteur'),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -1321,10 +1407,16 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
             
             SizedBox(
               width: double.infinity,
-              child: FilledButton.tonal.icon(
+              child: FilledButton.tonal(
                 onPressed: _addNote,
-                icon: const Icon(Icons.note_add),
-                label: const Text('Ajouter une note'),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.note_add),
+                    SizedBox(width: 8),
+                    Text('Ajouter une note'),
+                  ],
+                ),
               ),
             ),
             
@@ -1332,10 +1424,16 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
             
             SizedBox(
               width: double.infinity,
-              child: FilledButton.tonal.icon(
+              child: FilledButton.tonal(
                 onPressed: _editOrder,
-                icon: const Icon(Icons.edit),
-                label: const Text('Modifier la commande'),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.edit),
+                    SizedBox(width: 8),
+                    Text('Modifier la commande'),
+                  ],
+                ),
               ),
             ),
           ],
@@ -1381,10 +1479,16 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
             if (_currentOrder.canCancel) ...[
               SizedBox(
                 width: double.infinity,
-                child: FilledButton.icon(
+                child: FilledButton(
                   onPressed: _cancelOrder,
-                  icon: const Icon(Icons.cancel),
-                  label: const Text('Annuler la commande'),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.cancel),
+                      SizedBox(width: 8),
+                      Text('Annuler la commande'),
+                    ],
+                  ),
                   style: FilledButton.styleFrom(
                     backgroundColor: theme.colorScheme.error,
                     foregroundColor: theme.colorScheme.onError,
@@ -1396,10 +1500,16 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
             
             SizedBox(
               width: double.infinity,
-              child: OutlinedButton.icon(
+              child: OutlinedButton(
                 onPressed: _deleteOrder,
-                icon: const Icon(Icons.delete_forever),
-                label: const Text('Supprimer définitivement'),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.delete_forever),
+                    SizedBox(width: 8),
+                    Text('Supprimer définitivement'),
+                  ],
+                ),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: theme.colorScheme.error,
                   side: BorderSide(color: theme.colorScheme.error),
@@ -1424,16 +1534,32 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.only(bottom: 8),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: theme.colorScheme.outlineVariant,
+            width: 0.5,
+          ),
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              icon,
-              size: 20,
-              color: theme.colorScheme.onSurfaceVariant,
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                size: 18,
+                color: theme.colorScheme.onPrimaryContainer,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -1445,14 +1571,16 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w500,
+                      letterSpacing: 0.5,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Text(
                     value,
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: theme.colorScheme.onSurface,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
+                      height: 1.4,
                     ),
                     maxLines: maxLines,
                     overflow: TextOverflow.ellipsis,
@@ -1460,7 +1588,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                 ],
               ),
             ),
-            if (trailing != null) trailing,
+            if (trailing != null) ...[
+              const SizedBox(width: 8),
+              trailing,
+            ],
           ],
         ),
       ),
@@ -1483,20 +1614,32 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
           children: [
             if (_currentOrder.canAssign)
               Expanded(
-                child: FilledButton.icon(
+                child: FilledButton(
                   onPressed: _assignTransporter,
-                  icon: const Icon(Icons.person_add),
-                  label: const Text('Assigner'),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.person_add),
+                      SizedBox(width: 8),
+                      Text('Assigner'),
+                    ],
+                  ),
                 ),
               ),
             
             if (_currentOrder.canComplete) ...[
               if (_currentOrder.canAssign) const SizedBox(width: 12),
               Expanded(
-                child: FilledButton.icon(
+                child: FilledButton(
                   onPressed: _completeOrder,
-                  icon: const Icon(Icons.check),
-                  label: const Text('Compléter'),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.check),
+                      SizedBox(width: 8),
+                      Text('Compléter'),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -1505,10 +1648,16 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
               if (_currentOrder.canAssign || _currentOrder.canComplete) 
                 const SizedBox(width: 12),
               Expanded(
-                child: OutlinedButton.icon(
+                child: OutlinedButton(
                   onPressed: _cancelOrder,
-                  icon: const Icon(Icons.cancel),
-                  label: const Text('Annuler'),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.cancel),
+                      SizedBox(width: 8),
+                      Text('Annuler'),
+                    ],
+                  ),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: theme.colorScheme.error,
                     side: BorderSide(color: theme.colorScheme.error),
@@ -1533,39 +1682,6 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
   }
 
   // Event handlers and utility methods
-  void _handleOrdersStateChanges(BuildContext context, OrdersState state) {
-    state.whenOrNull(
-      actionSuccess: (orders, filter, viewMode, sortConfig, actionType, successMessage, selectedIds) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(successMessage),
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        
-        // Update current order if it's in the list
-        final updatedOrder = orders.firstWhere(
-          (order) => order.id == _currentOrder.id,
-          orElse: () => _currentOrder,
-        );
-        if (updatedOrder != _currentOrder) {
-          setState(() {
-            _currentOrder = updatedOrder;
-          });
-        }
-      },
-      actionError: (orders, filter, viewMode, sortConfig, actionType, errorMessage, selectedIds) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Theme.of(context).colorScheme.error,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      },
-    );
-  }
 
   void _handleMenuAction(String action) {
     switch (action) {
@@ -1573,7 +1689,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
         _copyToClipboard(_currentOrder.id.toString(), 'ID de commande');
         break;
       case 'copy_tracking':
-        _copyToClipboard(_currentOrder.trackingCode, 'Code de suivi');
+        if (_currentOrder.trackingCode != null) {
+          _copyToClipboard(_currentOrder.trackingCode!, 'Code de suivi');
+        }
         break;
       case 'share':
         _shareOrder();
@@ -1584,14 +1702,20 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
   Future<void> _refreshOrder() async {
     setState(() => _isLoading = true);
     
-    context.read<OrdersBloc>().add(
-      OrdersEvent.getOrderById(orderId: _currentOrder.id),
-    );
-    
-    // Simulate loading time for better UX
-    await Future.delayed(const Duration(milliseconds: 500));
-    
-    setState(() => _isLoading = false);
+    try {
+      final response = await _ordersService.getOrderById(_currentOrder.id);
+      if (response.isSuccess && response.data != null && mounted) {
+        setState(() {
+          _currentOrder = response.data!;
+        });
+      }
+    } catch (e) {
+      // Handle error silently or show snackbar
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   void _assignTransporter() {
@@ -1614,13 +1738,38 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
     );
   }
 
-  void _updateOrderStatus(OrderStatus status) {
-    context.read<OrdersBloc>().add(
-      OrdersEvent.updateOrderStatus(
-        orderId: _currentOrder.id,
-        status: status,
-      ),
-    );
+  void _updateOrderStatus(OrderStatus status) async {
+    try {
+      final response = await _ordersService.updateOrderStatus(_currentOrder.id, status.value);
+      if (response.isSuccess && mounted) {
+        setState(() {
+          _currentOrder = _currentOrder; // Force rebuild
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Statut mis à jour avec succès'),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+          ),
+        );
+        _refreshOrder(); // Refresh to get updated data
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de la mise à jour du statut'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur de connexion'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
   }
 
   void _completeOrder() {
@@ -1637,7 +1786,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
       'Annuler la commande',
       'Êtes-vous sûr de vouloir annuler cette commande ?',
       'Annuler la commande',
-      () => _updateOrderStatus(OrderStatus.canceled),
+      () => _updateOrderStatus(OrderStatus.cancelled),
       isDestructive: true,
     );
   }
@@ -1647,11 +1796,35 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
       'Supprimer définitivement',
       'Cette action est irréversible. Êtes-vous sûr de vouloir supprimer cette commande ?',
       'Supprimer',
-      () {
-        context.read<OrdersBloc>().add(
-          OrdersEvent.deleteOrder(orderId: _currentOrder.id),
-        );
-        Navigator.pop(context);
+      () async {
+        try {
+          final response = await _ordersService.cancelOrder(_currentOrder.id, 'Commande supprimée par l\'administrateur');
+          if (response.isSuccess && mounted) {
+            Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Commande supprimée avec succès'),
+                backgroundColor: Theme.of(context).colorScheme.primary,
+              ),
+            );
+          } else if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Erreur lors de la suppression'),
+                backgroundColor: Theme.of(context).colorScheme.error,
+              ),
+            );
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Erreur de connexion'),
+                backgroundColor: Theme.of(context).colorScheme.error,
+              ),
+            );
+          }
+        }
       },
       isDestructive: true,
     );
@@ -1777,14 +1950,22 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
   }
 
   ({String label, IconData icon}) _getStatusInfo(OrderStatus status) {
-    return status.when(
-      pending: () => (label: 'En attente', icon: Icons.pending_outlined),
-      assigned: () => (label: 'Assignée', icon: Icons.person_outlined),
-      inTransit: () => (label: 'En transit', icon: Icons.local_shipping_outlined),
-      delivered: () => (label: 'Livrée', icon: Icons.check_circle_outlined),
-      canceled: () => (label: 'Annulée', icon: Icons.cancel_outlined),
-      returned: () => (label: 'Retournée', icon: Icons.keyboard_return_outlined),
-    );
+    switch (status) {
+      case OrderStatus.pending:
+        return (label: 'En attente', icon: Icons.pending_outlined);
+      case OrderStatus.assigned:
+        return (label: 'Assignée', icon: Icons.person_outlined);
+      case OrderStatus.inDelivery:
+        return (label: 'En transit', icon: Icons.local_shipping_outlined);
+      case OrderStatus.delivered:
+        return (label: 'Livrée', icon: Icons.check_circle_outlined);
+      case OrderStatus.cancelled:
+        return (label: 'Annulée', icon: Icons.cancel_outlined);
+      case OrderStatus.returned:
+        return (label: 'Retournée', icon: Icons.keyboard_return_outlined);
+      default:
+        return (label: 'Statut inconnu', icon: Icons.info_outlined);
+    }
   }
 
   List<StatusAction> _getAvailableStatusActions() {
@@ -1794,16 +1975,16 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
       case OrderStatus.pending:
         actions.addAll([
           StatusAction(OrderStatus.assigned, 'Assigner', Icons.person_add),
-          StatusAction(OrderStatus.inTransit, 'En transit', Icons.local_shipping),
+          StatusAction(OrderStatus.inDelivery, 'En transit', Icons.local_shipping),
         ]);
         break;
       case OrderStatus.assigned:
         actions.addAll([
-          StatusAction(OrderStatus.inTransit, 'En transit', Icons.local_shipping),
+          StatusAction(OrderStatus.inDelivery, 'En transit', Icons.local_shipping),
           StatusAction(OrderStatus.delivered, 'Livrer', Icons.check_circle),
         ]);
         break;
-      case OrderStatus.inTransit:
+      case OrderStatus.inDelivery:
         actions.addAll([
           StatusAction(OrderStatus.delivered, 'Livrer', Icons.check_circle),
           StatusAction(OrderStatus.returned, 'Retourner', Icons.keyboard_return),
@@ -1829,14 +2010,12 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
     ));
     
     // Order assigned
-    if (_currentOrder.assignedAt != null) {
+    if (_currentOrder.hasTransporter) {
       events.add(TimelineEvent(
         title: 'Transporteur assigné',
-        subtitle: _currentOrder.transporter != null
-            ? 'Assignée à ${_currentOrder.transporter!.name}'
-            : 'Transporteur assigné',
+        subtitle: 'Assignée à ${_currentOrder.transporterName}',
         icon: Icons.person_add,
-        timestamp: _currentOrder.assignedAt,
+        timestamp: _currentOrder.createdAt, // Use creation time as fallback
         isCompleted: true,
       ));
     } else if (_currentOrder.status != OrderStatus.pending) {
@@ -1849,7 +2028,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
     }
     
     // In transit
-    if (_currentOrder.status == OrderStatus.inTransit ||
+    if (_currentOrder.status == OrderStatus.inDelivery ||
         _currentOrder.status == OrderStatus.delivered ||
         _currentOrder.status == OrderStatus.returned) {
       events.add(TimelineEvent(
@@ -1858,7 +2037,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
         icon: Icons.local_shipping,
         isCompleted: true,
       ));
-    } else if (_currentOrder.transporter != null) {
+    } else if (_currentOrder.hasTransporter) {
       events.add(TimelineEvent(
         title: 'En attente de prise en charge',
         subtitle: 'Le transporteur doit récupérer la commande',
@@ -1883,7 +2062,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
         icon: Icons.keyboard_return,
         isCompleted: true,
       ));
-    } else if (_currentOrder.status == OrderStatus.canceled) {
+    } else if (_currentOrder.status == OrderStatus.cancelled) {
       events.add(TimelineEvent(
         title: 'Commande annulée',
         subtitle: 'Commande annulée',

@@ -56,9 +56,7 @@ class SignalRService {
       _connection = HubConnectionBuilder()
           .withUrl(_hubUrl, options: HttpConnectionOptions(
             accessTokenFactory: () async => token,
-            headers: {'Authorization': 'Bearer $token'},
             transport: HttpTransportType.WebSockets,
-            logLevel: LogLevel.Information,
           ))
           .build();
 
@@ -314,14 +312,20 @@ class SignalRService {
 extension SignalRServiceExtension on SignalRService {
   /// Get a stream that automatically connects when first listened to
   Stream<T> getAutoConnectStream<T>(Stream<T> stream) {
-    return stream.transform(StreamTransformer<T, T>.fromHandlers(
-      handleListen: (sink, cancelOnError) {
-        // Auto-connect when stream is first listened to
-        if (!isConnected && !isConnecting) {
-          connect();
-        }
-        return stream.listen((data) => sink.add(data), cancelOnError: cancelOnError);
-      },
-    ));
+    return Stream<T>.multi((controller) {
+      // Auto-connect when stream is first listened to
+      if (!isConnected && !isConnecting) {
+        connect();
+      }
+      
+      // Forward all events from the original stream
+      final subscription = stream.listen(
+        controller.add,
+        onError: controller.addError,
+        onDone: controller.close,
+      );
+      
+      controller.onCancel = () => subscription.cancel();
+    });
   }
 }

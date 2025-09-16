@@ -32,12 +32,19 @@ mixin _$OrdersEvent {
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -45,6 +52,8 @@ mixin _$OrdersEvent {
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -92,12 +101,19 @@ mixin _$OrdersEvent {
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -105,6 +121,8 @@ mixin _$OrdersEvent {
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -148,12 +166,19 @@ mixin _$OrdersEvent {
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -161,6 +186,8 @@ mixin _$OrdersEvent {
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -195,11 +222,15 @@ mixin _$OrdersEvent {
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -227,11 +258,15 @@ mixin _$OrdersEvent {
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -256,11 +291,15 @@ mixin _$OrdersEvent {
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -483,12 +522,19 @@ class _$LoadOrdersEventImpl implements LoadOrdersEvent {
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -496,6 +542,8 @@ class _$LoadOrdersEventImpl implements LoadOrdersEvent {
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -556,12 +604,19 @@ class _$LoadOrdersEventImpl implements LoadOrdersEvent {
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -569,6 +624,8 @@ class _$LoadOrdersEventImpl implements LoadOrdersEvent {
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -625,12 +682,19 @@ class _$LoadOrdersEventImpl implements LoadOrdersEvent {
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -638,6 +702,8 @@ class _$LoadOrdersEventImpl implements LoadOrdersEvent {
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -688,11 +754,15 @@ class _$LoadOrdersEventImpl implements LoadOrdersEvent {
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -724,11 +794,15 @@ class _$LoadOrdersEventImpl implements LoadOrdersEvent {
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -757,11 +831,15 @@ class _$LoadOrdersEventImpl implements LoadOrdersEvent {
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -874,12 +952,19 @@ class _$LoadMoreOrdersEventImpl implements LoadMoreOrdersEvent {
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -887,6 +972,8 @@ class _$LoadMoreOrdersEventImpl implements LoadMoreOrdersEvent {
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -938,12 +1025,19 @@ class _$LoadMoreOrdersEventImpl implements LoadMoreOrdersEvent {
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -951,6 +1045,8 @@ class _$LoadMoreOrdersEventImpl implements LoadMoreOrdersEvent {
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -998,12 +1094,19 @@ class _$LoadMoreOrdersEventImpl implements LoadMoreOrdersEvent {
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -1011,6 +1114,8 @@ class _$LoadMoreOrdersEventImpl implements LoadMoreOrdersEvent {
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -1052,11 +1157,15 @@ class _$LoadMoreOrdersEventImpl implements LoadMoreOrdersEvent {
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -1088,11 +1197,15 @@ class _$LoadMoreOrdersEventImpl implements LoadMoreOrdersEvent {
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -1121,11 +1234,15 @@ class _$LoadMoreOrdersEventImpl implements LoadMoreOrdersEvent {
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -1213,12 +1330,19 @@ class _$RefreshOrdersEventImpl implements RefreshOrdersEvent {
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -1226,6 +1350,8 @@ class _$RefreshOrdersEventImpl implements RefreshOrdersEvent {
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -1277,12 +1403,19 @@ class _$RefreshOrdersEventImpl implements RefreshOrdersEvent {
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -1290,6 +1423,8 @@ class _$RefreshOrdersEventImpl implements RefreshOrdersEvent {
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -1337,12 +1472,19 @@ class _$RefreshOrdersEventImpl implements RefreshOrdersEvent {
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -1350,6 +1492,8 @@ class _$RefreshOrdersEventImpl implements RefreshOrdersEvent {
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -1391,11 +1535,15 @@ class _$RefreshOrdersEventImpl implements RefreshOrdersEvent {
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -1427,11 +1575,15 @@ class _$RefreshOrdersEventImpl implements RefreshOrdersEvent {
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -1460,11 +1612,15 @@ class _$RefreshOrdersEventImpl implements RefreshOrdersEvent {
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -1497,63 +1653,35 @@ abstract class RefreshOrdersEvent implements OrdersEvent {
 }
 
 /// @nodoc
-abstract class _$$ApplyFilterEventImplCopyWith<$Res> {
-  factory _$$ApplyFilterEventImplCopyWith(
-    _$ApplyFilterEventImpl value,
-    $Res Function(_$ApplyFilterEventImpl) then,
-  ) = __$$ApplyFilterEventImplCopyWithImpl<$Res>;
+abstract class _$$GetOrderByIdEventImplCopyWith<$Res> {
+  factory _$$GetOrderByIdEventImplCopyWith(
+    _$GetOrderByIdEventImpl value,
+    $Res Function(_$GetOrderByIdEventImpl) then,
+  ) = __$$GetOrderByIdEventImplCopyWithImpl<$Res>;
   @useResult
-  $Res call({
-    String? status,
-    int? cityId,
-    DateTime? fromDate,
-    DateTime? toDate,
-    String? search,
-  });
+  $Res call({int orderId});
 }
 
 /// @nodoc
-class __$$ApplyFilterEventImplCopyWithImpl<$Res>
-    extends _$OrdersEventCopyWithImpl<$Res, _$ApplyFilterEventImpl>
-    implements _$$ApplyFilterEventImplCopyWith<$Res> {
-  __$$ApplyFilterEventImplCopyWithImpl(
-    _$ApplyFilterEventImpl _value,
-    $Res Function(_$ApplyFilterEventImpl) _then,
+class __$$GetOrderByIdEventImplCopyWithImpl<$Res>
+    extends _$OrdersEventCopyWithImpl<$Res, _$GetOrderByIdEventImpl>
+    implements _$$GetOrderByIdEventImplCopyWith<$Res> {
+  __$$GetOrderByIdEventImplCopyWithImpl(
+    _$GetOrderByIdEventImpl _value,
+    $Res Function(_$GetOrderByIdEventImpl) _then,
   ) : super(_value, _then);
 
   /// Create a copy of OrdersEvent
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? status = freezed,
-    Object? cityId = freezed,
-    Object? fromDate = freezed,
-    Object? toDate = freezed,
-    Object? search = freezed,
-  }) {
+  $Res call({Object? orderId = null}) {
     return _then(
-      _$ApplyFilterEventImpl(
-        status: freezed == status
-            ? _value.status
-            : status // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        cityId: freezed == cityId
-            ? _value.cityId
-            : cityId // ignore: cast_nullable_to_non_nullable
-                  as int?,
-        fromDate: freezed == fromDate
-            ? _value.fromDate
-            : fromDate // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
-        toDate: freezed == toDate
-            ? _value.toDate
-            : toDate // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
-        search: freezed == search
-            ? _value.search
-            : search // ignore: cast_nullable_to_non_nullable
-                  as String?,
+      _$GetOrderByIdEventImpl(
+        orderId: null == orderId
+            ? _value.orderId
+            : orderId // ignore: cast_nullable_to_non_nullable
+                  as int,
       ),
     );
   }
@@ -1561,55 +1689,35 @@ class __$$ApplyFilterEventImplCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$ApplyFilterEventImpl implements ApplyFilterEvent {
-  const _$ApplyFilterEventImpl({
-    this.status,
-    this.cityId,
-    this.fromDate,
-    this.toDate,
-    this.search,
-  });
+class _$GetOrderByIdEventImpl implements GetOrderByIdEvent {
+  const _$GetOrderByIdEventImpl({required this.orderId});
 
   @override
-  final String? status;
-  @override
-  final int? cityId;
-  @override
-  final DateTime? fromDate;
-  @override
-  final DateTime? toDate;
-  @override
-  final String? search;
+  final int orderId;
 
   @override
   String toString() {
-    return 'OrdersEvent.applyFilter(status: $status, cityId: $cityId, fromDate: $fromDate, toDate: $toDate, search: $search)';
+    return 'OrdersEvent.getOrderById(orderId: $orderId)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$ApplyFilterEventImpl &&
-            (identical(other.status, status) || other.status == status) &&
-            (identical(other.cityId, cityId) || other.cityId == cityId) &&
-            (identical(other.fromDate, fromDate) ||
-                other.fromDate == fromDate) &&
-            (identical(other.toDate, toDate) || other.toDate == toDate) &&
-            (identical(other.search, search) || other.search == search));
+            other is _$GetOrderByIdEventImpl &&
+            (identical(other.orderId, orderId) || other.orderId == orderId));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, status, cityId, fromDate, toDate, search);
+  int get hashCode => Object.hash(runtimeType, orderId);
 
   /// Create a copy of OrdersEvent
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$ApplyFilterEventImplCopyWith<_$ApplyFilterEventImpl> get copyWith =>
-      __$$ApplyFilterEventImplCopyWithImpl<_$ApplyFilterEventImpl>(
+  _$$GetOrderByIdEventImplCopyWith<_$GetOrderByIdEventImpl> get copyWith =>
+      __$$GetOrderByIdEventImplCopyWithImpl<_$GetOrderByIdEventImpl>(
         this,
         _$identity,
       );
@@ -1630,12 +1738,19 @@ class _$ApplyFilterEventImpl implements ApplyFilterEvent {
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -1643,6 +1758,8 @@ class _$ApplyFilterEventImpl implements ApplyFilterEvent {
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -1675,7 +1792,7 @@ class _$ApplyFilterEventImpl implements ApplyFilterEvent {
     required TResult Function(int page, double? minValue) loadPriorityOrders,
     required TResult Function() loadTodayOrders,
   }) {
-    return applyFilter(status, cityId, fromDate, toDate, search);
+    return getOrderById(orderId);
   }
 
   @override
@@ -1694,12 +1811,19 @@ class _$ApplyFilterEventImpl implements ApplyFilterEvent {
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -1707,6 +1831,8 @@ class _$ApplyFilterEventImpl implements ApplyFilterEvent {
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -1735,7 +1861,7 @@ class _$ApplyFilterEventImpl implements ApplyFilterEvent {
     TResult? Function(int page, double? minValue)? loadPriorityOrders,
     TResult? Function()? loadTodayOrders,
   }) {
-    return applyFilter?.call(status, cityId, fromDate, toDate, search);
+    return getOrderById?.call(orderId);
   }
 
   @override
@@ -1754,12 +1880,19 @@ class _$ApplyFilterEventImpl implements ApplyFilterEvent {
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -1767,6 +1900,982 @@ class _$ApplyFilterEventImpl implements ApplyFilterEvent {
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
+    TResult Function(int orderId, int newTransporterId, String? reason)?
+    changeTransporter,
+    TResult Function(int orderId, String reason)? cancelOrder,
+    TResult Function(List<int> orderIds, String newStatus, String? note)?
+    bulkUpdateStatus,
+    TResult Function(List<int> orderIds, int transporterId)?
+    bulkAssignTransporter,
+    TResult Function(int orderId)? selectOrder,
+    TResult Function(int orderId)? deselectOrder,
+    TResult Function()? selectAllOrders,
+    TResult Function()? clearSelection,
+    TResult Function(String sortBy, String sortOrder)? sortOrders,
+    TResult Function(dynamic orderData)? orderUpdatedFromSignalR,
+    TResult Function(dynamic orderData)? newOrderFromSignalR,
+    TResult Function(OrderViewMode viewMode)? changeViewMode,
+    TResult Function(
+      String format,
+      DateTime? fromDate,
+      DateTime? toDate,
+      String? status,
+      int? cityId,
+    )?
+    exportOrders,
+    TResult Function(int page, int? cityId)? loadUnassignedOrders,
+    TResult Function(int page)? loadOverdueOrders,
+    TResult Function(int page, double? minValue)? loadPriorityOrders,
+    TResult Function()? loadTodayOrders,
+    required TResult orElse(),
+  }) {
+    if (getOrderById != null) {
+      return getOrderById(orderId);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(LoadOrdersEvent value) loadOrders,
+    required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
+    required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
+    required TResult Function(ApplyFilterEvent value) applyFilter,
+    required TResult Function(ClearFilterEvent value) clearFilter,
+    required TResult Function(SearchOrdersEvent value) searchOrders,
+    required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
+    required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
+    required TResult Function(ChangeTransporterEvent value) changeTransporter,
+    required TResult Function(CancelOrderEvent value) cancelOrder,
+    required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
+    required TResult Function(BulkAssignTransporterEvent value)
+    bulkAssignTransporter,
+    required TResult Function(SelectOrderEvent value) selectOrder,
+    required TResult Function(DeselectOrderEvent value) deselectOrder,
+    required TResult Function(SelectAllOrdersEvent value) selectAllOrders,
+    required TResult Function(ClearSelectionEvent value) clearSelection,
+    required TResult Function(SortOrdersEvent value) sortOrders,
+    required TResult Function(OrderUpdatedFromSignalREvent value)
+    orderUpdatedFromSignalR,
+    required TResult Function(NewOrderFromSignalREvent value)
+    newOrderFromSignalR,
+    required TResult Function(ChangeViewModeEvent value) changeViewMode,
+    required TResult Function(ExportOrdersEvent value) exportOrders,
+    required TResult Function(LoadUnassignedOrdersEvent value)
+    loadUnassignedOrders,
+    required TResult Function(LoadOverdueOrdersEvent value) loadOverdueOrders,
+    required TResult Function(LoadPriorityOrdersEvent value) loadPriorityOrders,
+    required TResult Function(LoadTodayOrdersEvent value) loadTodayOrders,
+  }) {
+    return getOrderById(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(LoadOrdersEvent value)? loadOrders,
+    TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
+    TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
+    TResult? Function(ApplyFilterEvent value)? applyFilter,
+    TResult? Function(ClearFilterEvent value)? clearFilter,
+    TResult? Function(SearchOrdersEvent value)? searchOrders,
+    TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
+    TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
+    TResult? Function(ChangeTransporterEvent value)? changeTransporter,
+    TResult? Function(CancelOrderEvent value)? cancelOrder,
+    TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
+    TResult? Function(BulkAssignTransporterEvent value)? bulkAssignTransporter,
+    TResult? Function(SelectOrderEvent value)? selectOrder,
+    TResult? Function(DeselectOrderEvent value)? deselectOrder,
+    TResult? Function(SelectAllOrdersEvent value)? selectAllOrders,
+    TResult? Function(ClearSelectionEvent value)? clearSelection,
+    TResult? Function(SortOrdersEvent value)? sortOrders,
+    TResult? Function(OrderUpdatedFromSignalREvent value)?
+    orderUpdatedFromSignalR,
+    TResult? Function(NewOrderFromSignalREvent value)? newOrderFromSignalR,
+    TResult? Function(ChangeViewModeEvent value)? changeViewMode,
+    TResult? Function(ExportOrdersEvent value)? exportOrders,
+    TResult? Function(LoadUnassignedOrdersEvent value)? loadUnassignedOrders,
+    TResult? Function(LoadOverdueOrdersEvent value)? loadOverdueOrders,
+    TResult? Function(LoadPriorityOrdersEvent value)? loadPriorityOrders,
+    TResult? Function(LoadTodayOrdersEvent value)? loadTodayOrders,
+  }) {
+    return getOrderById?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(LoadOrdersEvent value)? loadOrders,
+    TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
+    TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
+    TResult Function(ApplyFilterEvent value)? applyFilter,
+    TResult Function(ClearFilterEvent value)? clearFilter,
+    TResult Function(SearchOrdersEvent value)? searchOrders,
+    TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
+    TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
+    TResult Function(ChangeTransporterEvent value)? changeTransporter,
+    TResult Function(CancelOrderEvent value)? cancelOrder,
+    TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
+    TResult Function(BulkAssignTransporterEvent value)? bulkAssignTransporter,
+    TResult Function(SelectOrderEvent value)? selectOrder,
+    TResult Function(DeselectOrderEvent value)? deselectOrder,
+    TResult Function(SelectAllOrdersEvent value)? selectAllOrders,
+    TResult Function(ClearSelectionEvent value)? clearSelection,
+    TResult Function(SortOrdersEvent value)? sortOrders,
+    TResult Function(OrderUpdatedFromSignalREvent value)?
+    orderUpdatedFromSignalR,
+    TResult Function(NewOrderFromSignalREvent value)? newOrderFromSignalR,
+    TResult Function(ChangeViewModeEvent value)? changeViewMode,
+    TResult Function(ExportOrdersEvent value)? exportOrders,
+    TResult Function(LoadUnassignedOrdersEvent value)? loadUnassignedOrders,
+    TResult Function(LoadOverdueOrdersEvent value)? loadOverdueOrders,
+    TResult Function(LoadPriorityOrdersEvent value)? loadPriorityOrders,
+    TResult Function(LoadTodayOrdersEvent value)? loadTodayOrders,
+    required TResult orElse(),
+  }) {
+    if (getOrderById != null) {
+      return getOrderById(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class GetOrderByIdEvent implements OrdersEvent {
+  const factory GetOrderByIdEvent({required final int orderId}) =
+      _$GetOrderByIdEventImpl;
+
+  int get orderId;
+
+  /// Create a copy of OrdersEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$GetOrderByIdEventImplCopyWith<_$GetOrderByIdEventImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$DeleteOrderEventImplCopyWith<$Res> {
+  factory _$$DeleteOrderEventImplCopyWith(
+    _$DeleteOrderEventImpl value,
+    $Res Function(_$DeleteOrderEventImpl) then,
+  ) = __$$DeleteOrderEventImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({int orderId});
+}
+
+/// @nodoc
+class __$$DeleteOrderEventImplCopyWithImpl<$Res>
+    extends _$OrdersEventCopyWithImpl<$Res, _$DeleteOrderEventImpl>
+    implements _$$DeleteOrderEventImplCopyWith<$Res> {
+  __$$DeleteOrderEventImplCopyWithImpl(
+    _$DeleteOrderEventImpl _value,
+    $Res Function(_$DeleteOrderEventImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of OrdersEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? orderId = null}) {
+    return _then(
+      _$DeleteOrderEventImpl(
+        orderId: null == orderId
+            ? _value.orderId
+            : orderId // ignore: cast_nullable_to_non_nullable
+                  as int,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+
+class _$DeleteOrderEventImpl implements DeleteOrderEvent {
+  const _$DeleteOrderEventImpl({required this.orderId});
+
+  @override
+  final int orderId;
+
+  @override
+  String toString() {
+    return 'OrdersEvent.deleteOrder(orderId: $orderId)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$DeleteOrderEventImpl &&
+            (identical(other.orderId, orderId) || other.orderId == orderId));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, orderId);
+
+  /// Create a copy of OrdersEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$DeleteOrderEventImplCopyWith<_$DeleteOrderEventImpl> get copyWith =>
+      __$$DeleteOrderEventImplCopyWithImpl<_$DeleteOrderEventImpl>(
+        this,
+        _$identity,
+      );
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(
+      int page,
+      int pageSize,
+      String? status,
+      String? search,
+      int? cityId,
+      DateTime? fromDate,
+      DateTime? toDate,
+      bool isRefresh,
+    )
+    loadOrders,
+    required TResult Function() loadMoreOrders,
+    required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
+    required TResult Function(
+      String? status,
+      int? cityId,
+      DateTime? fromDate,
+      DateTime? toDate,
+      String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
+    )
+    applyFilter,
+    required TResult Function() clearFilter,
+    required TResult Function(String query) searchOrders,
+    required TResult Function(int orderId, String newStatus, String? note)
+    updateOrderStatus,
+    required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
+    required TResult Function(int orderId, int newTransporterId, String? reason)
+    changeTransporter,
+    required TResult Function(int orderId, String reason) cancelOrder,
+    required TResult Function(
+      List<int> orderIds,
+      String newStatus,
+      String? note,
+    )
+    bulkUpdateStatus,
+    required TResult Function(List<int> orderIds, int transporterId)
+    bulkAssignTransporter,
+    required TResult Function(int orderId) selectOrder,
+    required TResult Function(int orderId) deselectOrder,
+    required TResult Function() selectAllOrders,
+    required TResult Function() clearSelection,
+    required TResult Function(String sortBy, String sortOrder) sortOrders,
+    required TResult Function(dynamic orderData) orderUpdatedFromSignalR,
+    required TResult Function(dynamic orderData) newOrderFromSignalR,
+    required TResult Function(OrderViewMode viewMode) changeViewMode,
+    required TResult Function(
+      String format,
+      DateTime? fromDate,
+      DateTime? toDate,
+      String? status,
+      int? cityId,
+    )
+    exportOrders,
+    required TResult Function(int page, int? cityId) loadUnassignedOrders,
+    required TResult Function(int page) loadOverdueOrders,
+    required TResult Function(int page, double? minValue) loadPriorityOrders,
+    required TResult Function() loadTodayOrders,
+  }) {
+    return deleteOrder(orderId);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(
+      int page,
+      int pageSize,
+      String? status,
+      String? search,
+      int? cityId,
+      DateTime? fromDate,
+      DateTime? toDate,
+      bool isRefresh,
+    )?
+    loadOrders,
+    TResult? Function()? loadMoreOrders,
+    TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
+    TResult? Function(
+      String? status,
+      int? cityId,
+      DateTime? fromDate,
+      DateTime? toDate,
+      String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
+    )?
+    applyFilter,
+    TResult? Function()? clearFilter,
+    TResult? Function(String query)? searchOrders,
+    TResult? Function(int orderId, String newStatus, String? note)?
+    updateOrderStatus,
+    TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
+    TResult? Function(int orderId, int newTransporterId, String? reason)?
+    changeTransporter,
+    TResult? Function(int orderId, String reason)? cancelOrder,
+    TResult? Function(List<int> orderIds, String newStatus, String? note)?
+    bulkUpdateStatus,
+    TResult? Function(List<int> orderIds, int transporterId)?
+    bulkAssignTransporter,
+    TResult? Function(int orderId)? selectOrder,
+    TResult? Function(int orderId)? deselectOrder,
+    TResult? Function()? selectAllOrders,
+    TResult? Function()? clearSelection,
+    TResult? Function(String sortBy, String sortOrder)? sortOrders,
+    TResult? Function(dynamic orderData)? orderUpdatedFromSignalR,
+    TResult? Function(dynamic orderData)? newOrderFromSignalR,
+    TResult? Function(OrderViewMode viewMode)? changeViewMode,
+    TResult? Function(
+      String format,
+      DateTime? fromDate,
+      DateTime? toDate,
+      String? status,
+      int? cityId,
+    )?
+    exportOrders,
+    TResult? Function(int page, int? cityId)? loadUnassignedOrders,
+    TResult? Function(int page)? loadOverdueOrders,
+    TResult? Function(int page, double? minValue)? loadPriorityOrders,
+    TResult? Function()? loadTodayOrders,
+  }) {
+    return deleteOrder?.call(orderId);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(
+      int page,
+      int pageSize,
+      String? status,
+      String? search,
+      int? cityId,
+      DateTime? fromDate,
+      DateTime? toDate,
+      bool isRefresh,
+    )?
+    loadOrders,
+    TResult Function()? loadMoreOrders,
+    TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
+    TResult Function(
+      String? status,
+      int? cityId,
+      DateTime? fromDate,
+      DateTime? toDate,
+      String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
+    )?
+    applyFilter,
+    TResult Function()? clearFilter,
+    TResult Function(String query)? searchOrders,
+    TResult Function(int orderId, String newStatus, String? note)?
+    updateOrderStatus,
+    TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
+    TResult Function(int orderId, int newTransporterId, String? reason)?
+    changeTransporter,
+    TResult Function(int orderId, String reason)? cancelOrder,
+    TResult Function(List<int> orderIds, String newStatus, String? note)?
+    bulkUpdateStatus,
+    TResult Function(List<int> orderIds, int transporterId)?
+    bulkAssignTransporter,
+    TResult Function(int orderId)? selectOrder,
+    TResult Function(int orderId)? deselectOrder,
+    TResult Function()? selectAllOrders,
+    TResult Function()? clearSelection,
+    TResult Function(String sortBy, String sortOrder)? sortOrders,
+    TResult Function(dynamic orderData)? orderUpdatedFromSignalR,
+    TResult Function(dynamic orderData)? newOrderFromSignalR,
+    TResult Function(OrderViewMode viewMode)? changeViewMode,
+    TResult Function(
+      String format,
+      DateTime? fromDate,
+      DateTime? toDate,
+      String? status,
+      int? cityId,
+    )?
+    exportOrders,
+    TResult Function(int page, int? cityId)? loadUnassignedOrders,
+    TResult Function(int page)? loadOverdueOrders,
+    TResult Function(int page, double? minValue)? loadPriorityOrders,
+    TResult Function()? loadTodayOrders,
+    required TResult orElse(),
+  }) {
+    if (deleteOrder != null) {
+      return deleteOrder(orderId);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(LoadOrdersEvent value) loadOrders,
+    required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
+    required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
+    required TResult Function(ApplyFilterEvent value) applyFilter,
+    required TResult Function(ClearFilterEvent value) clearFilter,
+    required TResult Function(SearchOrdersEvent value) searchOrders,
+    required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
+    required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
+    required TResult Function(ChangeTransporterEvent value) changeTransporter,
+    required TResult Function(CancelOrderEvent value) cancelOrder,
+    required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
+    required TResult Function(BulkAssignTransporterEvent value)
+    bulkAssignTransporter,
+    required TResult Function(SelectOrderEvent value) selectOrder,
+    required TResult Function(DeselectOrderEvent value) deselectOrder,
+    required TResult Function(SelectAllOrdersEvent value) selectAllOrders,
+    required TResult Function(ClearSelectionEvent value) clearSelection,
+    required TResult Function(SortOrdersEvent value) sortOrders,
+    required TResult Function(OrderUpdatedFromSignalREvent value)
+    orderUpdatedFromSignalR,
+    required TResult Function(NewOrderFromSignalREvent value)
+    newOrderFromSignalR,
+    required TResult Function(ChangeViewModeEvent value) changeViewMode,
+    required TResult Function(ExportOrdersEvent value) exportOrders,
+    required TResult Function(LoadUnassignedOrdersEvent value)
+    loadUnassignedOrders,
+    required TResult Function(LoadOverdueOrdersEvent value) loadOverdueOrders,
+    required TResult Function(LoadPriorityOrdersEvent value) loadPriorityOrders,
+    required TResult Function(LoadTodayOrdersEvent value) loadTodayOrders,
+  }) {
+    return deleteOrder(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(LoadOrdersEvent value)? loadOrders,
+    TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
+    TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
+    TResult? Function(ApplyFilterEvent value)? applyFilter,
+    TResult? Function(ClearFilterEvent value)? clearFilter,
+    TResult? Function(SearchOrdersEvent value)? searchOrders,
+    TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
+    TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
+    TResult? Function(ChangeTransporterEvent value)? changeTransporter,
+    TResult? Function(CancelOrderEvent value)? cancelOrder,
+    TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
+    TResult? Function(BulkAssignTransporterEvent value)? bulkAssignTransporter,
+    TResult? Function(SelectOrderEvent value)? selectOrder,
+    TResult? Function(DeselectOrderEvent value)? deselectOrder,
+    TResult? Function(SelectAllOrdersEvent value)? selectAllOrders,
+    TResult? Function(ClearSelectionEvent value)? clearSelection,
+    TResult? Function(SortOrdersEvent value)? sortOrders,
+    TResult? Function(OrderUpdatedFromSignalREvent value)?
+    orderUpdatedFromSignalR,
+    TResult? Function(NewOrderFromSignalREvent value)? newOrderFromSignalR,
+    TResult? Function(ChangeViewModeEvent value)? changeViewMode,
+    TResult? Function(ExportOrdersEvent value)? exportOrders,
+    TResult? Function(LoadUnassignedOrdersEvent value)? loadUnassignedOrders,
+    TResult? Function(LoadOverdueOrdersEvent value)? loadOverdueOrders,
+    TResult? Function(LoadPriorityOrdersEvent value)? loadPriorityOrders,
+    TResult? Function(LoadTodayOrdersEvent value)? loadTodayOrders,
+  }) {
+    return deleteOrder?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(LoadOrdersEvent value)? loadOrders,
+    TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
+    TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
+    TResult Function(ApplyFilterEvent value)? applyFilter,
+    TResult Function(ClearFilterEvent value)? clearFilter,
+    TResult Function(SearchOrdersEvent value)? searchOrders,
+    TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
+    TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
+    TResult Function(ChangeTransporterEvent value)? changeTransporter,
+    TResult Function(CancelOrderEvent value)? cancelOrder,
+    TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
+    TResult Function(BulkAssignTransporterEvent value)? bulkAssignTransporter,
+    TResult Function(SelectOrderEvent value)? selectOrder,
+    TResult Function(DeselectOrderEvent value)? deselectOrder,
+    TResult Function(SelectAllOrdersEvent value)? selectAllOrders,
+    TResult Function(ClearSelectionEvent value)? clearSelection,
+    TResult Function(SortOrdersEvent value)? sortOrders,
+    TResult Function(OrderUpdatedFromSignalREvent value)?
+    orderUpdatedFromSignalR,
+    TResult Function(NewOrderFromSignalREvent value)? newOrderFromSignalR,
+    TResult Function(ChangeViewModeEvent value)? changeViewMode,
+    TResult Function(ExportOrdersEvent value)? exportOrders,
+    TResult Function(LoadUnassignedOrdersEvent value)? loadUnassignedOrders,
+    TResult Function(LoadOverdueOrdersEvent value)? loadOverdueOrders,
+    TResult Function(LoadPriorityOrdersEvent value)? loadPriorityOrders,
+    TResult Function(LoadTodayOrdersEvent value)? loadTodayOrders,
+    required TResult orElse(),
+  }) {
+    if (deleteOrder != null) {
+      return deleteOrder(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class DeleteOrderEvent implements OrdersEvent {
+  const factory DeleteOrderEvent({required final int orderId}) =
+      _$DeleteOrderEventImpl;
+
+  int get orderId;
+
+  /// Create a copy of OrdersEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$DeleteOrderEventImplCopyWith<_$DeleteOrderEventImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$ApplyFilterEventImplCopyWith<$Res> {
+  factory _$$ApplyFilterEventImplCopyWith(
+    _$ApplyFilterEventImpl value,
+    $Res Function(_$ApplyFilterEventImpl) then,
+  ) = __$$ApplyFilterEventImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({
+    String? status,
+    int? cityId,
+    DateTime? fromDate,
+    DateTime? toDate,
+    String? search,
+    bool unassignedOnly,
+    bool overdueOnly,
+    bool priorityOnly,
+    bool todayOnly,
+    double? minValue,
+  });
+}
+
+/// @nodoc
+class __$$ApplyFilterEventImplCopyWithImpl<$Res>
+    extends _$OrdersEventCopyWithImpl<$Res, _$ApplyFilterEventImpl>
+    implements _$$ApplyFilterEventImplCopyWith<$Res> {
+  __$$ApplyFilterEventImplCopyWithImpl(
+    _$ApplyFilterEventImpl _value,
+    $Res Function(_$ApplyFilterEventImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of OrdersEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? status = freezed,
+    Object? cityId = freezed,
+    Object? fromDate = freezed,
+    Object? toDate = freezed,
+    Object? search = freezed,
+    Object? unassignedOnly = null,
+    Object? overdueOnly = null,
+    Object? priorityOnly = null,
+    Object? todayOnly = null,
+    Object? minValue = freezed,
+  }) {
+    return _then(
+      _$ApplyFilterEventImpl(
+        status: freezed == status
+            ? _value.status
+            : status // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        cityId: freezed == cityId
+            ? _value.cityId
+            : cityId // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        fromDate: freezed == fromDate
+            ? _value.fromDate
+            : fromDate // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        toDate: freezed == toDate
+            ? _value.toDate
+            : toDate // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        search: freezed == search
+            ? _value.search
+            : search // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        unassignedOnly: null == unassignedOnly
+            ? _value.unassignedOnly
+            : unassignedOnly // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        overdueOnly: null == overdueOnly
+            ? _value.overdueOnly
+            : overdueOnly // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        priorityOnly: null == priorityOnly
+            ? _value.priorityOnly
+            : priorityOnly // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        todayOnly: null == todayOnly
+            ? _value.todayOnly
+            : todayOnly // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        minValue: freezed == minValue
+            ? _value.minValue
+            : minValue // ignore: cast_nullable_to_non_nullable
+                  as double?,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+
+class _$ApplyFilterEventImpl implements ApplyFilterEvent {
+  const _$ApplyFilterEventImpl({
+    this.status,
+    this.cityId,
+    this.fromDate,
+    this.toDate,
+    this.search,
+    this.unassignedOnly = false,
+    this.overdueOnly = false,
+    this.priorityOnly = false,
+    this.todayOnly = false,
+    this.minValue,
+  });
+
+  @override
+  final String? status;
+  @override
+  final int? cityId;
+  @override
+  final DateTime? fromDate;
+  @override
+  final DateTime? toDate;
+  @override
+  final String? search;
+  @override
+  @JsonKey()
+  final bool unassignedOnly;
+  @override
+  @JsonKey()
+  final bool overdueOnly;
+  @override
+  @JsonKey()
+  final bool priorityOnly;
+  @override
+  @JsonKey()
+  final bool todayOnly;
+  @override
+  final double? minValue;
+
+  @override
+  String toString() {
+    return 'OrdersEvent.applyFilter(status: $status, cityId: $cityId, fromDate: $fromDate, toDate: $toDate, search: $search, unassignedOnly: $unassignedOnly, overdueOnly: $overdueOnly, priorityOnly: $priorityOnly, todayOnly: $todayOnly, minValue: $minValue)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$ApplyFilterEventImpl &&
+            (identical(other.status, status) || other.status == status) &&
+            (identical(other.cityId, cityId) || other.cityId == cityId) &&
+            (identical(other.fromDate, fromDate) ||
+                other.fromDate == fromDate) &&
+            (identical(other.toDate, toDate) || other.toDate == toDate) &&
+            (identical(other.search, search) || other.search == search) &&
+            (identical(other.unassignedOnly, unassignedOnly) ||
+                other.unassignedOnly == unassignedOnly) &&
+            (identical(other.overdueOnly, overdueOnly) ||
+                other.overdueOnly == overdueOnly) &&
+            (identical(other.priorityOnly, priorityOnly) ||
+                other.priorityOnly == priorityOnly) &&
+            (identical(other.todayOnly, todayOnly) ||
+                other.todayOnly == todayOnly) &&
+            (identical(other.minValue, minValue) ||
+                other.minValue == minValue));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    status,
+    cityId,
+    fromDate,
+    toDate,
+    search,
+    unassignedOnly,
+    overdueOnly,
+    priorityOnly,
+    todayOnly,
+    minValue,
+  );
+
+  /// Create a copy of OrdersEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$ApplyFilterEventImplCopyWith<_$ApplyFilterEventImpl> get copyWith =>
+      __$$ApplyFilterEventImplCopyWithImpl<_$ApplyFilterEventImpl>(
+        this,
+        _$identity,
+      );
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(
+      int page,
+      int pageSize,
+      String? status,
+      String? search,
+      int? cityId,
+      DateTime? fromDate,
+      DateTime? toDate,
+      bool isRefresh,
+    )
+    loadOrders,
+    required TResult Function() loadMoreOrders,
+    required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
+    required TResult Function(
+      String? status,
+      int? cityId,
+      DateTime? fromDate,
+      DateTime? toDate,
+      String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
+    )
+    applyFilter,
+    required TResult Function() clearFilter,
+    required TResult Function(String query) searchOrders,
+    required TResult Function(int orderId, String newStatus, String? note)
+    updateOrderStatus,
+    required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
+    required TResult Function(int orderId, int newTransporterId, String? reason)
+    changeTransporter,
+    required TResult Function(int orderId, String reason) cancelOrder,
+    required TResult Function(
+      List<int> orderIds,
+      String newStatus,
+      String? note,
+    )
+    bulkUpdateStatus,
+    required TResult Function(List<int> orderIds, int transporterId)
+    bulkAssignTransporter,
+    required TResult Function(int orderId) selectOrder,
+    required TResult Function(int orderId) deselectOrder,
+    required TResult Function() selectAllOrders,
+    required TResult Function() clearSelection,
+    required TResult Function(String sortBy, String sortOrder) sortOrders,
+    required TResult Function(dynamic orderData) orderUpdatedFromSignalR,
+    required TResult Function(dynamic orderData) newOrderFromSignalR,
+    required TResult Function(OrderViewMode viewMode) changeViewMode,
+    required TResult Function(
+      String format,
+      DateTime? fromDate,
+      DateTime? toDate,
+      String? status,
+      int? cityId,
+    )
+    exportOrders,
+    required TResult Function(int page, int? cityId) loadUnassignedOrders,
+    required TResult Function(int page) loadOverdueOrders,
+    required TResult Function(int page, double? minValue) loadPriorityOrders,
+    required TResult Function() loadTodayOrders,
+  }) {
+    return applyFilter(
+      status,
+      cityId,
+      fromDate,
+      toDate,
+      search,
+      unassignedOnly,
+      overdueOnly,
+      priorityOnly,
+      todayOnly,
+      minValue,
+    );
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(
+      int page,
+      int pageSize,
+      String? status,
+      String? search,
+      int? cityId,
+      DateTime? fromDate,
+      DateTime? toDate,
+      bool isRefresh,
+    )?
+    loadOrders,
+    TResult? Function()? loadMoreOrders,
+    TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
+    TResult? Function(
+      String? status,
+      int? cityId,
+      DateTime? fromDate,
+      DateTime? toDate,
+      String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
+    )?
+    applyFilter,
+    TResult? Function()? clearFilter,
+    TResult? Function(String query)? searchOrders,
+    TResult? Function(int orderId, String newStatus, String? note)?
+    updateOrderStatus,
+    TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
+    TResult? Function(int orderId, int newTransporterId, String? reason)?
+    changeTransporter,
+    TResult? Function(int orderId, String reason)? cancelOrder,
+    TResult? Function(List<int> orderIds, String newStatus, String? note)?
+    bulkUpdateStatus,
+    TResult? Function(List<int> orderIds, int transporterId)?
+    bulkAssignTransporter,
+    TResult? Function(int orderId)? selectOrder,
+    TResult? Function(int orderId)? deselectOrder,
+    TResult? Function()? selectAllOrders,
+    TResult? Function()? clearSelection,
+    TResult? Function(String sortBy, String sortOrder)? sortOrders,
+    TResult? Function(dynamic orderData)? orderUpdatedFromSignalR,
+    TResult? Function(dynamic orderData)? newOrderFromSignalR,
+    TResult? Function(OrderViewMode viewMode)? changeViewMode,
+    TResult? Function(
+      String format,
+      DateTime? fromDate,
+      DateTime? toDate,
+      String? status,
+      int? cityId,
+    )?
+    exportOrders,
+    TResult? Function(int page, int? cityId)? loadUnassignedOrders,
+    TResult? Function(int page)? loadOverdueOrders,
+    TResult? Function(int page, double? minValue)? loadPriorityOrders,
+    TResult? Function()? loadTodayOrders,
+  }) {
+    return applyFilter?.call(
+      status,
+      cityId,
+      fromDate,
+      toDate,
+      search,
+      unassignedOnly,
+      overdueOnly,
+      priorityOnly,
+      todayOnly,
+      minValue,
+    );
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(
+      int page,
+      int pageSize,
+      String? status,
+      String? search,
+      int? cityId,
+      DateTime? fromDate,
+      DateTime? toDate,
+      bool isRefresh,
+    )?
+    loadOrders,
+    TResult Function()? loadMoreOrders,
+    TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
+    TResult Function(
+      String? status,
+      int? cityId,
+      DateTime? fromDate,
+      DateTime? toDate,
+      String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
+    )?
+    applyFilter,
+    TResult Function()? clearFilter,
+    TResult Function(String query)? searchOrders,
+    TResult Function(int orderId, String newStatus, String? note)?
+    updateOrderStatus,
+    TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -1797,7 +2906,18 @@ class _$ApplyFilterEventImpl implements ApplyFilterEvent {
     required TResult orElse(),
   }) {
     if (applyFilter != null) {
-      return applyFilter(status, cityId, fromDate, toDate, search);
+      return applyFilter(
+        status,
+        cityId,
+        fromDate,
+        toDate,
+        search,
+        unassignedOnly,
+        overdueOnly,
+        priorityOnly,
+        todayOnly,
+        minValue,
+      );
     }
     return orElse();
   }
@@ -1808,11 +2928,15 @@ class _$ApplyFilterEventImpl implements ApplyFilterEvent {
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -1844,11 +2968,15 @@ class _$ApplyFilterEventImpl implements ApplyFilterEvent {
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -1877,11 +3005,15 @@ class _$ApplyFilterEventImpl implements ApplyFilterEvent {
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -1916,6 +3048,11 @@ abstract class ApplyFilterEvent implements OrdersEvent {
     final DateTime? fromDate,
     final DateTime? toDate,
     final String? search,
+    final bool unassignedOnly,
+    final bool overdueOnly,
+    final bool priorityOnly,
+    final bool todayOnly,
+    final double? minValue,
   }) = _$ApplyFilterEventImpl;
 
   String? get status;
@@ -1923,6 +3060,11 @@ abstract class ApplyFilterEvent implements OrdersEvent {
   DateTime? get fromDate;
   DateTime? get toDate;
   String? get search;
+  bool get unassignedOnly;
+  bool get overdueOnly;
+  bool get priorityOnly;
+  bool get todayOnly;
+  double? get minValue;
 
   /// Create a copy of OrdersEvent
   /// with the given fields replaced by the non-null parameter values.
@@ -1987,12 +3129,19 @@ class _$ClearFilterEventImpl implements ClearFilterEvent {
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -2000,6 +3149,8 @@ class _$ClearFilterEventImpl implements ClearFilterEvent {
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -2051,12 +3202,19 @@ class _$ClearFilterEventImpl implements ClearFilterEvent {
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -2064,6 +3222,8 @@ class _$ClearFilterEventImpl implements ClearFilterEvent {
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -2111,12 +3271,19 @@ class _$ClearFilterEventImpl implements ClearFilterEvent {
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -2124,6 +3291,8 @@ class _$ClearFilterEventImpl implements ClearFilterEvent {
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -2165,11 +3334,15 @@ class _$ClearFilterEventImpl implements ClearFilterEvent {
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -2201,11 +3374,15 @@ class _$ClearFilterEventImpl implements ClearFilterEvent {
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -2234,11 +3411,15 @@ class _$ClearFilterEventImpl implements ClearFilterEvent {
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -2356,12 +3537,19 @@ class _$SearchOrdersEventImpl implements SearchOrdersEvent {
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -2369,6 +3557,8 @@ class _$SearchOrdersEventImpl implements SearchOrdersEvent {
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -2420,12 +3610,19 @@ class _$SearchOrdersEventImpl implements SearchOrdersEvent {
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -2433,6 +3630,8 @@ class _$SearchOrdersEventImpl implements SearchOrdersEvent {
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -2480,12 +3679,19 @@ class _$SearchOrdersEventImpl implements SearchOrdersEvent {
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -2493,6 +3699,8 @@ class _$SearchOrdersEventImpl implements SearchOrdersEvent {
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -2534,11 +3742,15 @@ class _$SearchOrdersEventImpl implements SearchOrdersEvent {
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -2570,11 +3782,15 @@ class _$SearchOrdersEventImpl implements SearchOrdersEvent {
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -2603,11 +3819,15 @@ class _$SearchOrdersEventImpl implements SearchOrdersEvent {
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -2758,12 +3978,19 @@ class _$UpdateOrderStatusEventImpl implements UpdateOrderStatusEvent {
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -2771,6 +3998,8 @@ class _$UpdateOrderStatusEventImpl implements UpdateOrderStatusEvent {
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -2822,12 +4051,19 @@ class _$UpdateOrderStatusEventImpl implements UpdateOrderStatusEvent {
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -2835,6 +4071,8 @@ class _$UpdateOrderStatusEventImpl implements UpdateOrderStatusEvent {
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -2882,12 +4120,19 @@ class _$UpdateOrderStatusEventImpl implements UpdateOrderStatusEvent {
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -2895,6 +4140,8 @@ class _$UpdateOrderStatusEventImpl implements UpdateOrderStatusEvent {
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -2936,11 +4183,15 @@ class _$UpdateOrderStatusEventImpl implements UpdateOrderStatusEvent {
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -2972,11 +4223,15 @@ class _$UpdateOrderStatusEventImpl implements UpdateOrderStatusEvent {
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -3005,11 +4260,15 @@ class _$UpdateOrderStatusEventImpl implements UpdateOrderStatusEvent {
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -3153,12 +4412,19 @@ class _$AssignTransporterEventImpl implements AssignTransporterEvent {
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -3166,6 +4432,8 @@ class _$AssignTransporterEventImpl implements AssignTransporterEvent {
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -3217,12 +4485,19 @@ class _$AssignTransporterEventImpl implements AssignTransporterEvent {
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -3230,6 +4505,8 @@ class _$AssignTransporterEventImpl implements AssignTransporterEvent {
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -3277,12 +4554,19 @@ class _$AssignTransporterEventImpl implements AssignTransporterEvent {
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -3290,6 +4574,8 @@ class _$AssignTransporterEventImpl implements AssignTransporterEvent {
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -3331,11 +4617,15 @@ class _$AssignTransporterEventImpl implements AssignTransporterEvent {
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -3367,11 +4657,15 @@ class _$AssignTransporterEventImpl implements AssignTransporterEvent {
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -3400,11 +4694,15 @@ class _$AssignTransporterEventImpl implements AssignTransporterEvent {
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -3445,6 +4743,855 @@ abstract class AssignTransporterEvent implements OrdersEvent {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$AssignTransporterEventImplCopyWith<_$AssignTransporterEventImpl>
+  get copyWith => throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$AssignOrderEventImplCopyWith<$Res> {
+  factory _$$AssignOrderEventImplCopyWith(
+    _$AssignOrderEventImpl value,
+    $Res Function(_$AssignOrderEventImpl) then,
+  ) = __$$AssignOrderEventImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({int orderId, int transporterId});
+}
+
+/// @nodoc
+class __$$AssignOrderEventImplCopyWithImpl<$Res>
+    extends _$OrdersEventCopyWithImpl<$Res, _$AssignOrderEventImpl>
+    implements _$$AssignOrderEventImplCopyWith<$Res> {
+  __$$AssignOrderEventImplCopyWithImpl(
+    _$AssignOrderEventImpl _value,
+    $Res Function(_$AssignOrderEventImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of OrdersEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? orderId = null, Object? transporterId = null}) {
+    return _then(
+      _$AssignOrderEventImpl(
+        orderId: null == orderId
+            ? _value.orderId
+            : orderId // ignore: cast_nullable_to_non_nullable
+                  as int,
+        transporterId: null == transporterId
+            ? _value.transporterId
+            : transporterId // ignore: cast_nullable_to_non_nullable
+                  as int,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+
+class _$AssignOrderEventImpl implements AssignOrderEvent {
+  const _$AssignOrderEventImpl({
+    required this.orderId,
+    required this.transporterId,
+  });
+
+  @override
+  final int orderId;
+  @override
+  final int transporterId;
+
+  @override
+  String toString() {
+    return 'OrdersEvent.assignOrder(orderId: $orderId, transporterId: $transporterId)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$AssignOrderEventImpl &&
+            (identical(other.orderId, orderId) || other.orderId == orderId) &&
+            (identical(other.transporterId, transporterId) ||
+                other.transporterId == transporterId));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, orderId, transporterId);
+
+  /// Create a copy of OrdersEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$AssignOrderEventImplCopyWith<_$AssignOrderEventImpl> get copyWith =>
+      __$$AssignOrderEventImplCopyWithImpl<_$AssignOrderEventImpl>(
+        this,
+        _$identity,
+      );
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(
+      int page,
+      int pageSize,
+      String? status,
+      String? search,
+      int? cityId,
+      DateTime? fromDate,
+      DateTime? toDate,
+      bool isRefresh,
+    )
+    loadOrders,
+    required TResult Function() loadMoreOrders,
+    required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
+    required TResult Function(
+      String? status,
+      int? cityId,
+      DateTime? fromDate,
+      DateTime? toDate,
+      String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
+    )
+    applyFilter,
+    required TResult Function() clearFilter,
+    required TResult Function(String query) searchOrders,
+    required TResult Function(int orderId, String newStatus, String? note)
+    updateOrderStatus,
+    required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
+    required TResult Function(int orderId, int newTransporterId, String? reason)
+    changeTransporter,
+    required TResult Function(int orderId, String reason) cancelOrder,
+    required TResult Function(
+      List<int> orderIds,
+      String newStatus,
+      String? note,
+    )
+    bulkUpdateStatus,
+    required TResult Function(List<int> orderIds, int transporterId)
+    bulkAssignTransporter,
+    required TResult Function(int orderId) selectOrder,
+    required TResult Function(int orderId) deselectOrder,
+    required TResult Function() selectAllOrders,
+    required TResult Function() clearSelection,
+    required TResult Function(String sortBy, String sortOrder) sortOrders,
+    required TResult Function(dynamic orderData) orderUpdatedFromSignalR,
+    required TResult Function(dynamic orderData) newOrderFromSignalR,
+    required TResult Function(OrderViewMode viewMode) changeViewMode,
+    required TResult Function(
+      String format,
+      DateTime? fromDate,
+      DateTime? toDate,
+      String? status,
+      int? cityId,
+    )
+    exportOrders,
+    required TResult Function(int page, int? cityId) loadUnassignedOrders,
+    required TResult Function(int page) loadOverdueOrders,
+    required TResult Function(int page, double? minValue) loadPriorityOrders,
+    required TResult Function() loadTodayOrders,
+  }) {
+    return assignOrder(orderId, transporterId);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(
+      int page,
+      int pageSize,
+      String? status,
+      String? search,
+      int? cityId,
+      DateTime? fromDate,
+      DateTime? toDate,
+      bool isRefresh,
+    )?
+    loadOrders,
+    TResult? Function()? loadMoreOrders,
+    TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
+    TResult? Function(
+      String? status,
+      int? cityId,
+      DateTime? fromDate,
+      DateTime? toDate,
+      String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
+    )?
+    applyFilter,
+    TResult? Function()? clearFilter,
+    TResult? Function(String query)? searchOrders,
+    TResult? Function(int orderId, String newStatus, String? note)?
+    updateOrderStatus,
+    TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
+    TResult? Function(int orderId, int newTransporterId, String? reason)?
+    changeTransporter,
+    TResult? Function(int orderId, String reason)? cancelOrder,
+    TResult? Function(List<int> orderIds, String newStatus, String? note)?
+    bulkUpdateStatus,
+    TResult? Function(List<int> orderIds, int transporterId)?
+    bulkAssignTransporter,
+    TResult? Function(int orderId)? selectOrder,
+    TResult? Function(int orderId)? deselectOrder,
+    TResult? Function()? selectAllOrders,
+    TResult? Function()? clearSelection,
+    TResult? Function(String sortBy, String sortOrder)? sortOrders,
+    TResult? Function(dynamic orderData)? orderUpdatedFromSignalR,
+    TResult? Function(dynamic orderData)? newOrderFromSignalR,
+    TResult? Function(OrderViewMode viewMode)? changeViewMode,
+    TResult? Function(
+      String format,
+      DateTime? fromDate,
+      DateTime? toDate,
+      String? status,
+      int? cityId,
+    )?
+    exportOrders,
+    TResult? Function(int page, int? cityId)? loadUnassignedOrders,
+    TResult? Function(int page)? loadOverdueOrders,
+    TResult? Function(int page, double? minValue)? loadPriorityOrders,
+    TResult? Function()? loadTodayOrders,
+  }) {
+    return assignOrder?.call(orderId, transporterId);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(
+      int page,
+      int pageSize,
+      String? status,
+      String? search,
+      int? cityId,
+      DateTime? fromDate,
+      DateTime? toDate,
+      bool isRefresh,
+    )?
+    loadOrders,
+    TResult Function()? loadMoreOrders,
+    TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
+    TResult Function(
+      String? status,
+      int? cityId,
+      DateTime? fromDate,
+      DateTime? toDate,
+      String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
+    )?
+    applyFilter,
+    TResult Function()? clearFilter,
+    TResult Function(String query)? searchOrders,
+    TResult Function(int orderId, String newStatus, String? note)?
+    updateOrderStatus,
+    TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
+    TResult Function(int orderId, int newTransporterId, String? reason)?
+    changeTransporter,
+    TResult Function(int orderId, String reason)? cancelOrder,
+    TResult Function(List<int> orderIds, String newStatus, String? note)?
+    bulkUpdateStatus,
+    TResult Function(List<int> orderIds, int transporterId)?
+    bulkAssignTransporter,
+    TResult Function(int orderId)? selectOrder,
+    TResult Function(int orderId)? deselectOrder,
+    TResult Function()? selectAllOrders,
+    TResult Function()? clearSelection,
+    TResult Function(String sortBy, String sortOrder)? sortOrders,
+    TResult Function(dynamic orderData)? orderUpdatedFromSignalR,
+    TResult Function(dynamic orderData)? newOrderFromSignalR,
+    TResult Function(OrderViewMode viewMode)? changeViewMode,
+    TResult Function(
+      String format,
+      DateTime? fromDate,
+      DateTime? toDate,
+      String? status,
+      int? cityId,
+    )?
+    exportOrders,
+    TResult Function(int page, int? cityId)? loadUnassignedOrders,
+    TResult Function(int page)? loadOverdueOrders,
+    TResult Function(int page, double? minValue)? loadPriorityOrders,
+    TResult Function()? loadTodayOrders,
+    required TResult orElse(),
+  }) {
+    if (assignOrder != null) {
+      return assignOrder(orderId, transporterId);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(LoadOrdersEvent value) loadOrders,
+    required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
+    required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
+    required TResult Function(ApplyFilterEvent value) applyFilter,
+    required TResult Function(ClearFilterEvent value) clearFilter,
+    required TResult Function(SearchOrdersEvent value) searchOrders,
+    required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
+    required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
+    required TResult Function(ChangeTransporterEvent value) changeTransporter,
+    required TResult Function(CancelOrderEvent value) cancelOrder,
+    required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
+    required TResult Function(BulkAssignTransporterEvent value)
+    bulkAssignTransporter,
+    required TResult Function(SelectOrderEvent value) selectOrder,
+    required TResult Function(DeselectOrderEvent value) deselectOrder,
+    required TResult Function(SelectAllOrdersEvent value) selectAllOrders,
+    required TResult Function(ClearSelectionEvent value) clearSelection,
+    required TResult Function(SortOrdersEvent value) sortOrders,
+    required TResult Function(OrderUpdatedFromSignalREvent value)
+    orderUpdatedFromSignalR,
+    required TResult Function(NewOrderFromSignalREvent value)
+    newOrderFromSignalR,
+    required TResult Function(ChangeViewModeEvent value) changeViewMode,
+    required TResult Function(ExportOrdersEvent value) exportOrders,
+    required TResult Function(LoadUnassignedOrdersEvent value)
+    loadUnassignedOrders,
+    required TResult Function(LoadOverdueOrdersEvent value) loadOverdueOrders,
+    required TResult Function(LoadPriorityOrdersEvent value) loadPriorityOrders,
+    required TResult Function(LoadTodayOrdersEvent value) loadTodayOrders,
+  }) {
+    return assignOrder(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(LoadOrdersEvent value)? loadOrders,
+    TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
+    TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
+    TResult? Function(ApplyFilterEvent value)? applyFilter,
+    TResult? Function(ClearFilterEvent value)? clearFilter,
+    TResult? Function(SearchOrdersEvent value)? searchOrders,
+    TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
+    TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
+    TResult? Function(ChangeTransporterEvent value)? changeTransporter,
+    TResult? Function(CancelOrderEvent value)? cancelOrder,
+    TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
+    TResult? Function(BulkAssignTransporterEvent value)? bulkAssignTransporter,
+    TResult? Function(SelectOrderEvent value)? selectOrder,
+    TResult? Function(DeselectOrderEvent value)? deselectOrder,
+    TResult? Function(SelectAllOrdersEvent value)? selectAllOrders,
+    TResult? Function(ClearSelectionEvent value)? clearSelection,
+    TResult? Function(SortOrdersEvent value)? sortOrders,
+    TResult? Function(OrderUpdatedFromSignalREvent value)?
+    orderUpdatedFromSignalR,
+    TResult? Function(NewOrderFromSignalREvent value)? newOrderFromSignalR,
+    TResult? Function(ChangeViewModeEvent value)? changeViewMode,
+    TResult? Function(ExportOrdersEvent value)? exportOrders,
+    TResult? Function(LoadUnassignedOrdersEvent value)? loadUnassignedOrders,
+    TResult? Function(LoadOverdueOrdersEvent value)? loadOverdueOrders,
+    TResult? Function(LoadPriorityOrdersEvent value)? loadPriorityOrders,
+    TResult? Function(LoadTodayOrdersEvent value)? loadTodayOrders,
+  }) {
+    return assignOrder?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(LoadOrdersEvent value)? loadOrders,
+    TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
+    TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
+    TResult Function(ApplyFilterEvent value)? applyFilter,
+    TResult Function(ClearFilterEvent value)? clearFilter,
+    TResult Function(SearchOrdersEvent value)? searchOrders,
+    TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
+    TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
+    TResult Function(ChangeTransporterEvent value)? changeTransporter,
+    TResult Function(CancelOrderEvent value)? cancelOrder,
+    TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
+    TResult Function(BulkAssignTransporterEvent value)? bulkAssignTransporter,
+    TResult Function(SelectOrderEvent value)? selectOrder,
+    TResult Function(DeselectOrderEvent value)? deselectOrder,
+    TResult Function(SelectAllOrdersEvent value)? selectAllOrders,
+    TResult Function(ClearSelectionEvent value)? clearSelection,
+    TResult Function(SortOrdersEvent value)? sortOrders,
+    TResult Function(OrderUpdatedFromSignalREvent value)?
+    orderUpdatedFromSignalR,
+    TResult Function(NewOrderFromSignalREvent value)? newOrderFromSignalR,
+    TResult Function(ChangeViewModeEvent value)? changeViewMode,
+    TResult Function(ExportOrdersEvent value)? exportOrders,
+    TResult Function(LoadUnassignedOrdersEvent value)? loadUnassignedOrders,
+    TResult Function(LoadOverdueOrdersEvent value)? loadOverdueOrders,
+    TResult Function(LoadPriorityOrdersEvent value)? loadPriorityOrders,
+    TResult Function(LoadTodayOrdersEvent value)? loadTodayOrders,
+    required TResult orElse(),
+  }) {
+    if (assignOrder != null) {
+      return assignOrder(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class AssignOrderEvent implements OrdersEvent {
+  const factory AssignOrderEvent({
+    required final int orderId,
+    required final int transporterId,
+  }) = _$AssignOrderEventImpl;
+
+  int get orderId;
+  int get transporterId;
+
+  /// Create a copy of OrdersEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$AssignOrderEventImplCopyWith<_$AssignOrderEventImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$AutoAssignOrderEventImplCopyWith<$Res> {
+  factory _$$AutoAssignOrderEventImplCopyWith(
+    _$AutoAssignOrderEventImpl value,
+    $Res Function(_$AutoAssignOrderEventImpl) then,
+  ) = __$$AutoAssignOrderEventImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({int orderId});
+}
+
+/// @nodoc
+class __$$AutoAssignOrderEventImplCopyWithImpl<$Res>
+    extends _$OrdersEventCopyWithImpl<$Res, _$AutoAssignOrderEventImpl>
+    implements _$$AutoAssignOrderEventImplCopyWith<$Res> {
+  __$$AutoAssignOrderEventImplCopyWithImpl(
+    _$AutoAssignOrderEventImpl _value,
+    $Res Function(_$AutoAssignOrderEventImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of OrdersEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? orderId = null}) {
+    return _then(
+      _$AutoAssignOrderEventImpl(
+        orderId: null == orderId
+            ? _value.orderId
+            : orderId // ignore: cast_nullable_to_non_nullable
+                  as int,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+
+class _$AutoAssignOrderEventImpl implements AutoAssignOrderEvent {
+  const _$AutoAssignOrderEventImpl({required this.orderId});
+
+  @override
+  final int orderId;
+
+  @override
+  String toString() {
+    return 'OrdersEvent.autoAssignOrder(orderId: $orderId)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$AutoAssignOrderEventImpl &&
+            (identical(other.orderId, orderId) || other.orderId == orderId));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, orderId);
+
+  /// Create a copy of OrdersEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$AutoAssignOrderEventImplCopyWith<_$AutoAssignOrderEventImpl>
+  get copyWith =>
+      __$$AutoAssignOrderEventImplCopyWithImpl<_$AutoAssignOrderEventImpl>(
+        this,
+        _$identity,
+      );
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(
+      int page,
+      int pageSize,
+      String? status,
+      String? search,
+      int? cityId,
+      DateTime? fromDate,
+      DateTime? toDate,
+      bool isRefresh,
+    )
+    loadOrders,
+    required TResult Function() loadMoreOrders,
+    required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
+    required TResult Function(
+      String? status,
+      int? cityId,
+      DateTime? fromDate,
+      DateTime? toDate,
+      String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
+    )
+    applyFilter,
+    required TResult Function() clearFilter,
+    required TResult Function(String query) searchOrders,
+    required TResult Function(int orderId, String newStatus, String? note)
+    updateOrderStatus,
+    required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
+    required TResult Function(int orderId, int newTransporterId, String? reason)
+    changeTransporter,
+    required TResult Function(int orderId, String reason) cancelOrder,
+    required TResult Function(
+      List<int> orderIds,
+      String newStatus,
+      String? note,
+    )
+    bulkUpdateStatus,
+    required TResult Function(List<int> orderIds, int transporterId)
+    bulkAssignTransporter,
+    required TResult Function(int orderId) selectOrder,
+    required TResult Function(int orderId) deselectOrder,
+    required TResult Function() selectAllOrders,
+    required TResult Function() clearSelection,
+    required TResult Function(String sortBy, String sortOrder) sortOrders,
+    required TResult Function(dynamic orderData) orderUpdatedFromSignalR,
+    required TResult Function(dynamic orderData) newOrderFromSignalR,
+    required TResult Function(OrderViewMode viewMode) changeViewMode,
+    required TResult Function(
+      String format,
+      DateTime? fromDate,
+      DateTime? toDate,
+      String? status,
+      int? cityId,
+    )
+    exportOrders,
+    required TResult Function(int page, int? cityId) loadUnassignedOrders,
+    required TResult Function(int page) loadOverdueOrders,
+    required TResult Function(int page, double? minValue) loadPriorityOrders,
+    required TResult Function() loadTodayOrders,
+  }) {
+    return autoAssignOrder(orderId);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(
+      int page,
+      int pageSize,
+      String? status,
+      String? search,
+      int? cityId,
+      DateTime? fromDate,
+      DateTime? toDate,
+      bool isRefresh,
+    )?
+    loadOrders,
+    TResult? Function()? loadMoreOrders,
+    TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
+    TResult? Function(
+      String? status,
+      int? cityId,
+      DateTime? fromDate,
+      DateTime? toDate,
+      String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
+    )?
+    applyFilter,
+    TResult? Function()? clearFilter,
+    TResult? Function(String query)? searchOrders,
+    TResult? Function(int orderId, String newStatus, String? note)?
+    updateOrderStatus,
+    TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
+    TResult? Function(int orderId, int newTransporterId, String? reason)?
+    changeTransporter,
+    TResult? Function(int orderId, String reason)? cancelOrder,
+    TResult? Function(List<int> orderIds, String newStatus, String? note)?
+    bulkUpdateStatus,
+    TResult? Function(List<int> orderIds, int transporterId)?
+    bulkAssignTransporter,
+    TResult? Function(int orderId)? selectOrder,
+    TResult? Function(int orderId)? deselectOrder,
+    TResult? Function()? selectAllOrders,
+    TResult? Function()? clearSelection,
+    TResult? Function(String sortBy, String sortOrder)? sortOrders,
+    TResult? Function(dynamic orderData)? orderUpdatedFromSignalR,
+    TResult? Function(dynamic orderData)? newOrderFromSignalR,
+    TResult? Function(OrderViewMode viewMode)? changeViewMode,
+    TResult? Function(
+      String format,
+      DateTime? fromDate,
+      DateTime? toDate,
+      String? status,
+      int? cityId,
+    )?
+    exportOrders,
+    TResult? Function(int page, int? cityId)? loadUnassignedOrders,
+    TResult? Function(int page)? loadOverdueOrders,
+    TResult? Function(int page, double? minValue)? loadPriorityOrders,
+    TResult? Function()? loadTodayOrders,
+  }) {
+    return autoAssignOrder?.call(orderId);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(
+      int page,
+      int pageSize,
+      String? status,
+      String? search,
+      int? cityId,
+      DateTime? fromDate,
+      DateTime? toDate,
+      bool isRefresh,
+    )?
+    loadOrders,
+    TResult Function()? loadMoreOrders,
+    TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
+    TResult Function(
+      String? status,
+      int? cityId,
+      DateTime? fromDate,
+      DateTime? toDate,
+      String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
+    )?
+    applyFilter,
+    TResult Function()? clearFilter,
+    TResult Function(String query)? searchOrders,
+    TResult Function(int orderId, String newStatus, String? note)?
+    updateOrderStatus,
+    TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
+    TResult Function(int orderId, int newTransporterId, String? reason)?
+    changeTransporter,
+    TResult Function(int orderId, String reason)? cancelOrder,
+    TResult Function(List<int> orderIds, String newStatus, String? note)?
+    bulkUpdateStatus,
+    TResult Function(List<int> orderIds, int transporterId)?
+    bulkAssignTransporter,
+    TResult Function(int orderId)? selectOrder,
+    TResult Function(int orderId)? deselectOrder,
+    TResult Function()? selectAllOrders,
+    TResult Function()? clearSelection,
+    TResult Function(String sortBy, String sortOrder)? sortOrders,
+    TResult Function(dynamic orderData)? orderUpdatedFromSignalR,
+    TResult Function(dynamic orderData)? newOrderFromSignalR,
+    TResult Function(OrderViewMode viewMode)? changeViewMode,
+    TResult Function(
+      String format,
+      DateTime? fromDate,
+      DateTime? toDate,
+      String? status,
+      int? cityId,
+    )?
+    exportOrders,
+    TResult Function(int page, int? cityId)? loadUnassignedOrders,
+    TResult Function(int page)? loadOverdueOrders,
+    TResult Function(int page, double? minValue)? loadPriorityOrders,
+    TResult Function()? loadTodayOrders,
+    required TResult orElse(),
+  }) {
+    if (autoAssignOrder != null) {
+      return autoAssignOrder(orderId);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(LoadOrdersEvent value) loadOrders,
+    required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
+    required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
+    required TResult Function(ApplyFilterEvent value) applyFilter,
+    required TResult Function(ClearFilterEvent value) clearFilter,
+    required TResult Function(SearchOrdersEvent value) searchOrders,
+    required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
+    required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
+    required TResult Function(ChangeTransporterEvent value) changeTransporter,
+    required TResult Function(CancelOrderEvent value) cancelOrder,
+    required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
+    required TResult Function(BulkAssignTransporterEvent value)
+    bulkAssignTransporter,
+    required TResult Function(SelectOrderEvent value) selectOrder,
+    required TResult Function(DeselectOrderEvent value) deselectOrder,
+    required TResult Function(SelectAllOrdersEvent value) selectAllOrders,
+    required TResult Function(ClearSelectionEvent value) clearSelection,
+    required TResult Function(SortOrdersEvent value) sortOrders,
+    required TResult Function(OrderUpdatedFromSignalREvent value)
+    orderUpdatedFromSignalR,
+    required TResult Function(NewOrderFromSignalREvent value)
+    newOrderFromSignalR,
+    required TResult Function(ChangeViewModeEvent value) changeViewMode,
+    required TResult Function(ExportOrdersEvent value) exportOrders,
+    required TResult Function(LoadUnassignedOrdersEvent value)
+    loadUnassignedOrders,
+    required TResult Function(LoadOverdueOrdersEvent value) loadOverdueOrders,
+    required TResult Function(LoadPriorityOrdersEvent value) loadPriorityOrders,
+    required TResult Function(LoadTodayOrdersEvent value) loadTodayOrders,
+  }) {
+    return autoAssignOrder(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(LoadOrdersEvent value)? loadOrders,
+    TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
+    TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
+    TResult? Function(ApplyFilterEvent value)? applyFilter,
+    TResult? Function(ClearFilterEvent value)? clearFilter,
+    TResult? Function(SearchOrdersEvent value)? searchOrders,
+    TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
+    TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
+    TResult? Function(ChangeTransporterEvent value)? changeTransporter,
+    TResult? Function(CancelOrderEvent value)? cancelOrder,
+    TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
+    TResult? Function(BulkAssignTransporterEvent value)? bulkAssignTransporter,
+    TResult? Function(SelectOrderEvent value)? selectOrder,
+    TResult? Function(DeselectOrderEvent value)? deselectOrder,
+    TResult? Function(SelectAllOrdersEvent value)? selectAllOrders,
+    TResult? Function(ClearSelectionEvent value)? clearSelection,
+    TResult? Function(SortOrdersEvent value)? sortOrders,
+    TResult? Function(OrderUpdatedFromSignalREvent value)?
+    orderUpdatedFromSignalR,
+    TResult? Function(NewOrderFromSignalREvent value)? newOrderFromSignalR,
+    TResult? Function(ChangeViewModeEvent value)? changeViewMode,
+    TResult? Function(ExportOrdersEvent value)? exportOrders,
+    TResult? Function(LoadUnassignedOrdersEvent value)? loadUnassignedOrders,
+    TResult? Function(LoadOverdueOrdersEvent value)? loadOverdueOrders,
+    TResult? Function(LoadPriorityOrdersEvent value)? loadPriorityOrders,
+    TResult? Function(LoadTodayOrdersEvent value)? loadTodayOrders,
+  }) {
+    return autoAssignOrder?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(LoadOrdersEvent value)? loadOrders,
+    TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
+    TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
+    TResult Function(ApplyFilterEvent value)? applyFilter,
+    TResult Function(ClearFilterEvent value)? clearFilter,
+    TResult Function(SearchOrdersEvent value)? searchOrders,
+    TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
+    TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
+    TResult Function(ChangeTransporterEvent value)? changeTransporter,
+    TResult Function(CancelOrderEvent value)? cancelOrder,
+    TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
+    TResult Function(BulkAssignTransporterEvent value)? bulkAssignTransporter,
+    TResult Function(SelectOrderEvent value)? selectOrder,
+    TResult Function(DeselectOrderEvent value)? deselectOrder,
+    TResult Function(SelectAllOrdersEvent value)? selectAllOrders,
+    TResult Function(ClearSelectionEvent value)? clearSelection,
+    TResult Function(SortOrdersEvent value)? sortOrders,
+    TResult Function(OrderUpdatedFromSignalREvent value)?
+    orderUpdatedFromSignalR,
+    TResult Function(NewOrderFromSignalREvent value)? newOrderFromSignalR,
+    TResult Function(ChangeViewModeEvent value)? changeViewMode,
+    TResult Function(ExportOrdersEvent value)? exportOrders,
+    TResult Function(LoadUnassignedOrdersEvent value)? loadUnassignedOrders,
+    TResult Function(LoadOverdueOrdersEvent value)? loadOverdueOrders,
+    TResult Function(LoadPriorityOrdersEvent value)? loadPriorityOrders,
+    TResult Function(LoadTodayOrdersEvent value)? loadTodayOrders,
+    required TResult orElse(),
+  }) {
+    if (autoAssignOrder != null) {
+      return autoAssignOrder(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class AutoAssignOrderEvent implements OrdersEvent {
+  const factory AutoAssignOrderEvent({required final int orderId}) =
+      _$AutoAssignOrderEventImpl;
+
+  int get orderId;
+
+  /// Create a copy of OrdersEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$AutoAssignOrderEventImplCopyWith<_$AutoAssignOrderEventImpl>
   get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -3559,12 +5706,19 @@ class _$ChangeTransporterEventImpl implements ChangeTransporterEvent {
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -3572,6 +5726,8 @@ class _$ChangeTransporterEventImpl implements ChangeTransporterEvent {
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -3623,12 +5779,19 @@ class _$ChangeTransporterEventImpl implements ChangeTransporterEvent {
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -3636,6 +5799,8 @@ class _$ChangeTransporterEventImpl implements ChangeTransporterEvent {
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -3683,12 +5848,19 @@ class _$ChangeTransporterEventImpl implements ChangeTransporterEvent {
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -3696,6 +5868,8 @@ class _$ChangeTransporterEventImpl implements ChangeTransporterEvent {
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -3737,11 +5911,15 @@ class _$ChangeTransporterEventImpl implements ChangeTransporterEvent {
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -3773,11 +5951,15 @@ class _$ChangeTransporterEventImpl implements ChangeTransporterEvent {
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -3806,11 +5988,15 @@ class _$ChangeTransporterEventImpl implements ChangeTransporterEvent {
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -3949,12 +6135,19 @@ class _$CancelOrderEventImpl implements CancelOrderEvent {
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -3962,6 +6155,8 @@ class _$CancelOrderEventImpl implements CancelOrderEvent {
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -4013,12 +6208,19 @@ class _$CancelOrderEventImpl implements CancelOrderEvent {
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -4026,6 +6228,8 @@ class _$CancelOrderEventImpl implements CancelOrderEvent {
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -4073,12 +6277,19 @@ class _$CancelOrderEventImpl implements CancelOrderEvent {
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -4086,6 +6297,8 @@ class _$CancelOrderEventImpl implements CancelOrderEvent {
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -4127,11 +6340,15 @@ class _$CancelOrderEventImpl implements CancelOrderEvent {
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -4163,11 +6380,15 @@ class _$CancelOrderEventImpl implements CancelOrderEvent {
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -4196,11 +6417,15 @@ class _$CancelOrderEventImpl implements CancelOrderEvent {
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -4365,12 +6590,19 @@ class _$BulkUpdateStatusEventImpl implements BulkUpdateStatusEvent {
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -4378,6 +6610,8 @@ class _$BulkUpdateStatusEventImpl implements BulkUpdateStatusEvent {
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -4429,12 +6663,19 @@ class _$BulkUpdateStatusEventImpl implements BulkUpdateStatusEvent {
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -4442,6 +6683,8 @@ class _$BulkUpdateStatusEventImpl implements BulkUpdateStatusEvent {
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -4489,12 +6732,19 @@ class _$BulkUpdateStatusEventImpl implements BulkUpdateStatusEvent {
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -4502,6 +6752,8 @@ class _$BulkUpdateStatusEventImpl implements BulkUpdateStatusEvent {
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -4543,11 +6795,15 @@ class _$BulkUpdateStatusEventImpl implements BulkUpdateStatusEvent {
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -4579,11 +6835,15 @@ class _$BulkUpdateStatusEventImpl implements BulkUpdateStatusEvent {
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -4612,11 +6872,15 @@ class _$BulkUpdateStatusEventImpl implements BulkUpdateStatusEvent {
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -4769,12 +7033,19 @@ class _$BulkAssignTransporterEventImpl implements BulkAssignTransporterEvent {
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -4782,6 +7053,8 @@ class _$BulkAssignTransporterEventImpl implements BulkAssignTransporterEvent {
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -4833,12 +7106,19 @@ class _$BulkAssignTransporterEventImpl implements BulkAssignTransporterEvent {
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -4846,6 +7126,8 @@ class _$BulkAssignTransporterEventImpl implements BulkAssignTransporterEvent {
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -4893,12 +7175,19 @@ class _$BulkAssignTransporterEventImpl implements BulkAssignTransporterEvent {
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -4906,6 +7195,8 @@ class _$BulkAssignTransporterEventImpl implements BulkAssignTransporterEvent {
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -4947,11 +7238,15 @@ class _$BulkAssignTransporterEventImpl implements BulkAssignTransporterEvent {
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -4983,11 +7278,15 @@ class _$BulkAssignTransporterEventImpl implements BulkAssignTransporterEvent {
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -5016,11 +7315,15 @@ class _$BulkAssignTransporterEventImpl implements BulkAssignTransporterEvent {
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -5150,12 +7453,19 @@ class _$SelectOrderEventImpl implements SelectOrderEvent {
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -5163,6 +7473,8 @@ class _$SelectOrderEventImpl implements SelectOrderEvent {
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -5214,12 +7526,19 @@ class _$SelectOrderEventImpl implements SelectOrderEvent {
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -5227,6 +7546,8 @@ class _$SelectOrderEventImpl implements SelectOrderEvent {
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -5274,12 +7595,19 @@ class _$SelectOrderEventImpl implements SelectOrderEvent {
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -5287,6 +7615,8 @@ class _$SelectOrderEventImpl implements SelectOrderEvent {
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -5328,11 +7658,15 @@ class _$SelectOrderEventImpl implements SelectOrderEvent {
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -5364,11 +7698,15 @@ class _$SelectOrderEventImpl implements SelectOrderEvent {
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -5397,11 +7735,15 @@ class _$SelectOrderEventImpl implements SelectOrderEvent {
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -5528,12 +7870,19 @@ class _$DeselectOrderEventImpl implements DeselectOrderEvent {
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -5541,6 +7890,8 @@ class _$DeselectOrderEventImpl implements DeselectOrderEvent {
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -5592,12 +7943,19 @@ class _$DeselectOrderEventImpl implements DeselectOrderEvent {
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -5605,6 +7963,8 @@ class _$DeselectOrderEventImpl implements DeselectOrderEvent {
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -5652,12 +8012,19 @@ class _$DeselectOrderEventImpl implements DeselectOrderEvent {
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -5665,6 +8032,8 @@ class _$DeselectOrderEventImpl implements DeselectOrderEvent {
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -5706,11 +8075,15 @@ class _$DeselectOrderEventImpl implements DeselectOrderEvent {
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -5742,11 +8115,15 @@ class _$DeselectOrderEventImpl implements DeselectOrderEvent {
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -5775,11 +8152,15 @@ class _$DeselectOrderEventImpl implements DeselectOrderEvent {
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -5877,12 +8258,19 @@ class _$SelectAllOrdersEventImpl implements SelectAllOrdersEvent {
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -5890,6 +8278,8 @@ class _$SelectAllOrdersEventImpl implements SelectAllOrdersEvent {
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -5941,12 +8331,19 @@ class _$SelectAllOrdersEventImpl implements SelectAllOrdersEvent {
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -5954,6 +8351,8 @@ class _$SelectAllOrdersEventImpl implements SelectAllOrdersEvent {
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -6001,12 +8400,19 @@ class _$SelectAllOrdersEventImpl implements SelectAllOrdersEvent {
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -6014,6 +8420,8 @@ class _$SelectAllOrdersEventImpl implements SelectAllOrdersEvent {
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -6055,11 +8463,15 @@ class _$SelectAllOrdersEventImpl implements SelectAllOrdersEvent {
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -6091,11 +8503,15 @@ class _$SelectAllOrdersEventImpl implements SelectAllOrdersEvent {
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -6124,11 +8540,15 @@ class _$SelectAllOrdersEventImpl implements SelectAllOrdersEvent {
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -6217,12 +8637,19 @@ class _$ClearSelectionEventImpl implements ClearSelectionEvent {
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -6230,6 +8657,8 @@ class _$ClearSelectionEventImpl implements ClearSelectionEvent {
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -6281,12 +8710,19 @@ class _$ClearSelectionEventImpl implements ClearSelectionEvent {
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -6294,6 +8730,8 @@ class _$ClearSelectionEventImpl implements ClearSelectionEvent {
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -6341,12 +8779,19 @@ class _$ClearSelectionEventImpl implements ClearSelectionEvent {
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -6354,6 +8799,8 @@ class _$ClearSelectionEventImpl implements ClearSelectionEvent {
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -6395,11 +8842,15 @@ class _$ClearSelectionEventImpl implements ClearSelectionEvent {
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -6431,11 +8882,15 @@ class _$ClearSelectionEventImpl implements ClearSelectionEvent {
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -6464,11 +8919,15 @@ class _$ClearSelectionEventImpl implements ClearSelectionEvent {
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -6594,12 +9053,19 @@ class _$SortOrdersEventImpl implements SortOrdersEvent {
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -6607,6 +9073,8 @@ class _$SortOrdersEventImpl implements SortOrdersEvent {
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -6658,12 +9126,19 @@ class _$SortOrdersEventImpl implements SortOrdersEvent {
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -6671,6 +9146,8 @@ class _$SortOrdersEventImpl implements SortOrdersEvent {
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -6718,12 +9195,19 @@ class _$SortOrdersEventImpl implements SortOrdersEvent {
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -6731,6 +9215,8 @@ class _$SortOrdersEventImpl implements SortOrdersEvent {
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -6772,11 +9258,15 @@ class _$SortOrdersEventImpl implements SortOrdersEvent {
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -6808,11 +9298,15 @@ class _$SortOrdersEventImpl implements SortOrdersEvent {
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -6841,11 +9335,15 @@ class _$SortOrdersEventImpl implements SortOrdersEvent {
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -6979,12 +9477,19 @@ class _$OrderUpdatedFromSignalREventImpl
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -6992,6 +9497,8 @@ class _$OrderUpdatedFromSignalREventImpl
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -7043,12 +9550,19 @@ class _$OrderUpdatedFromSignalREventImpl
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -7056,6 +9570,8 @@ class _$OrderUpdatedFromSignalREventImpl
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -7103,12 +9619,19 @@ class _$OrderUpdatedFromSignalREventImpl
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -7116,6 +9639,8 @@ class _$OrderUpdatedFromSignalREventImpl
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -7157,11 +9682,15 @@ class _$OrderUpdatedFromSignalREventImpl
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -7193,11 +9722,15 @@ class _$OrderUpdatedFromSignalREventImpl
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -7226,11 +9759,15 @@ class _$OrderUpdatedFromSignalREventImpl
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -7361,12 +9898,19 @@ class _$NewOrderFromSignalREventImpl implements NewOrderFromSignalREvent {
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -7374,6 +9918,8 @@ class _$NewOrderFromSignalREventImpl implements NewOrderFromSignalREvent {
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -7425,12 +9971,19 @@ class _$NewOrderFromSignalREventImpl implements NewOrderFromSignalREvent {
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -7438,6 +9991,8 @@ class _$NewOrderFromSignalREventImpl implements NewOrderFromSignalREvent {
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -7485,12 +10040,19 @@ class _$NewOrderFromSignalREventImpl implements NewOrderFromSignalREvent {
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -7498,6 +10060,8 @@ class _$NewOrderFromSignalREventImpl implements NewOrderFromSignalREvent {
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -7539,11 +10103,15 @@ class _$NewOrderFromSignalREventImpl implements NewOrderFromSignalREvent {
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -7575,11 +10143,15 @@ class _$NewOrderFromSignalREventImpl implements NewOrderFromSignalREvent {
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -7608,11 +10180,15 @@ class _$NewOrderFromSignalREventImpl implements NewOrderFromSignalREvent {
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -7740,12 +10316,19 @@ class _$ChangeViewModeEventImpl implements ChangeViewModeEvent {
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -7753,6 +10336,8 @@ class _$ChangeViewModeEventImpl implements ChangeViewModeEvent {
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -7804,12 +10389,19 @@ class _$ChangeViewModeEventImpl implements ChangeViewModeEvent {
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -7817,6 +10409,8 @@ class _$ChangeViewModeEventImpl implements ChangeViewModeEvent {
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -7864,12 +10458,19 @@ class _$ChangeViewModeEventImpl implements ChangeViewModeEvent {
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -7877,6 +10478,8 @@ class _$ChangeViewModeEventImpl implements ChangeViewModeEvent {
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -7918,11 +10521,15 @@ class _$ChangeViewModeEventImpl implements ChangeViewModeEvent {
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -7954,11 +10561,15 @@ class _$ChangeViewModeEventImpl implements ChangeViewModeEvent {
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -7987,11 +10598,15 @@ class _$ChangeViewModeEventImpl implements ChangeViewModeEvent {
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -8167,12 +10782,19 @@ class _$ExportOrdersEventImpl implements ExportOrdersEvent {
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -8180,6 +10802,8 @@ class _$ExportOrdersEventImpl implements ExportOrdersEvent {
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -8231,12 +10855,19 @@ class _$ExportOrdersEventImpl implements ExportOrdersEvent {
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -8244,6 +10875,8 @@ class _$ExportOrdersEventImpl implements ExportOrdersEvent {
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -8291,12 +10924,19 @@ class _$ExportOrdersEventImpl implements ExportOrdersEvent {
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -8304,6 +10944,8 @@ class _$ExportOrdersEventImpl implements ExportOrdersEvent {
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -8345,11 +10987,15 @@ class _$ExportOrdersEventImpl implements ExportOrdersEvent {
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -8381,11 +11027,15 @@ class _$ExportOrdersEventImpl implements ExportOrdersEvent {
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -8414,11 +11064,15 @@ class _$ExportOrdersEventImpl implements ExportOrdersEvent {
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -8562,12 +11216,19 @@ class _$LoadUnassignedOrdersEventImpl implements LoadUnassignedOrdersEvent {
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -8575,6 +11236,8 @@ class _$LoadUnassignedOrdersEventImpl implements LoadUnassignedOrdersEvent {
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -8626,12 +11289,19 @@ class _$LoadUnassignedOrdersEventImpl implements LoadUnassignedOrdersEvent {
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -8639,6 +11309,8 @@ class _$LoadUnassignedOrdersEventImpl implements LoadUnassignedOrdersEvent {
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -8686,12 +11358,19 @@ class _$LoadUnassignedOrdersEventImpl implements LoadUnassignedOrdersEvent {
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -8699,6 +11378,8 @@ class _$LoadUnassignedOrdersEventImpl implements LoadUnassignedOrdersEvent {
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -8740,11 +11421,15 @@ class _$LoadUnassignedOrdersEventImpl implements LoadUnassignedOrdersEvent {
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -8776,11 +11461,15 @@ class _$LoadUnassignedOrdersEventImpl implements LoadUnassignedOrdersEvent {
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -8809,11 +11498,15 @@ class _$LoadUnassignedOrdersEventImpl implements LoadUnassignedOrdersEvent {
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -8943,12 +11636,19 @@ class _$LoadOverdueOrdersEventImpl implements LoadOverdueOrdersEvent {
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -8956,6 +11656,8 @@ class _$LoadOverdueOrdersEventImpl implements LoadOverdueOrdersEvent {
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -9007,12 +11709,19 @@ class _$LoadOverdueOrdersEventImpl implements LoadOverdueOrdersEvent {
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -9020,6 +11729,8 @@ class _$LoadOverdueOrdersEventImpl implements LoadOverdueOrdersEvent {
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -9067,12 +11778,19 @@ class _$LoadOverdueOrdersEventImpl implements LoadOverdueOrdersEvent {
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -9080,6 +11798,8 @@ class _$LoadOverdueOrdersEventImpl implements LoadOverdueOrdersEvent {
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -9121,11 +11841,15 @@ class _$LoadOverdueOrdersEventImpl implements LoadOverdueOrdersEvent {
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -9157,11 +11881,15 @@ class _$LoadOverdueOrdersEventImpl implements LoadOverdueOrdersEvent {
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -9190,11 +11918,15 @@ class _$LoadOverdueOrdersEventImpl implements LoadOverdueOrdersEvent {
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -9330,12 +12062,19 @@ class _$LoadPriorityOrdersEventImpl implements LoadPriorityOrdersEvent {
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -9343,6 +12082,8 @@ class _$LoadPriorityOrdersEventImpl implements LoadPriorityOrdersEvent {
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -9394,12 +12135,19 @@ class _$LoadPriorityOrdersEventImpl implements LoadPriorityOrdersEvent {
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -9407,6 +12155,8 @@ class _$LoadPriorityOrdersEventImpl implements LoadPriorityOrdersEvent {
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -9454,12 +12204,19 @@ class _$LoadPriorityOrdersEventImpl implements LoadPriorityOrdersEvent {
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -9467,6 +12224,8 @@ class _$LoadPriorityOrdersEventImpl implements LoadPriorityOrdersEvent {
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -9508,11 +12267,15 @@ class _$LoadPriorityOrdersEventImpl implements LoadPriorityOrdersEvent {
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -9544,11 +12307,15 @@ class _$LoadPriorityOrdersEventImpl implements LoadPriorityOrdersEvent {
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -9577,11 +12344,15 @@ class _$LoadPriorityOrdersEventImpl implements LoadPriorityOrdersEvent {
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -9682,12 +12453,19 @@ class _$LoadTodayOrdersEventImpl implements LoadTodayOrdersEvent {
     loadOrders,
     required TResult Function() loadMoreOrders,
     required TResult Function() refreshOrders,
+    required TResult Function(int orderId) getOrderById,
+    required TResult Function(int orderId) deleteOrder,
     required TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )
     applyFilter,
     required TResult Function() clearFilter,
@@ -9695,6 +12473,8 @@ class _$LoadTodayOrdersEventImpl implements LoadTodayOrdersEvent {
     required TResult Function(int orderId, String newStatus, String? note)
     updateOrderStatus,
     required TResult Function(int orderId, int transporterId) assignTransporter,
+    required TResult Function(int orderId, int transporterId) assignOrder,
+    required TResult Function(int orderId) autoAssignOrder,
     required TResult Function(int orderId, int newTransporterId, String? reason)
     changeTransporter,
     required TResult Function(int orderId, String reason) cancelOrder,
@@ -9746,12 +12526,19 @@ class _$LoadTodayOrdersEventImpl implements LoadTodayOrdersEvent {
     loadOrders,
     TResult? Function()? loadMoreOrders,
     TResult? Function()? refreshOrders,
+    TResult? Function(int orderId)? getOrderById,
+    TResult? Function(int orderId)? deleteOrder,
     TResult? Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult? Function()? clearFilter,
@@ -9759,6 +12546,8 @@ class _$LoadTodayOrdersEventImpl implements LoadTodayOrdersEvent {
     TResult? Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult? Function(int orderId, int transporterId)? assignTransporter,
+    TResult? Function(int orderId, int transporterId)? assignOrder,
+    TResult? Function(int orderId)? autoAssignOrder,
     TResult? Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult? Function(int orderId, String reason)? cancelOrder,
@@ -9806,12 +12595,19 @@ class _$LoadTodayOrdersEventImpl implements LoadTodayOrdersEvent {
     loadOrders,
     TResult Function()? loadMoreOrders,
     TResult Function()? refreshOrders,
+    TResult Function(int orderId)? getOrderById,
+    TResult Function(int orderId)? deleteOrder,
     TResult Function(
       String? status,
       int? cityId,
       DateTime? fromDate,
       DateTime? toDate,
       String? search,
+      bool unassignedOnly,
+      bool overdueOnly,
+      bool priorityOnly,
+      bool todayOnly,
+      double? minValue,
     )?
     applyFilter,
     TResult Function()? clearFilter,
@@ -9819,6 +12615,8 @@ class _$LoadTodayOrdersEventImpl implements LoadTodayOrdersEvent {
     TResult Function(int orderId, String newStatus, String? note)?
     updateOrderStatus,
     TResult Function(int orderId, int transporterId)? assignTransporter,
+    TResult Function(int orderId, int transporterId)? assignOrder,
+    TResult Function(int orderId)? autoAssignOrder,
     TResult Function(int orderId, int newTransporterId, String? reason)?
     changeTransporter,
     TResult Function(int orderId, String reason)? cancelOrder,
@@ -9860,11 +12658,15 @@ class _$LoadTodayOrdersEventImpl implements LoadTodayOrdersEvent {
     required TResult Function(LoadOrdersEvent value) loadOrders,
     required TResult Function(LoadMoreOrdersEvent value) loadMoreOrders,
     required TResult Function(RefreshOrdersEvent value) refreshOrders,
+    required TResult Function(GetOrderByIdEvent value) getOrderById,
+    required TResult Function(DeleteOrderEvent value) deleteOrder,
     required TResult Function(ApplyFilterEvent value) applyFilter,
     required TResult Function(ClearFilterEvent value) clearFilter,
     required TResult Function(SearchOrdersEvent value) searchOrders,
     required TResult Function(UpdateOrderStatusEvent value) updateOrderStatus,
     required TResult Function(AssignTransporterEvent value) assignTransporter,
+    required TResult Function(AssignOrderEvent value) assignOrder,
+    required TResult Function(AutoAssignOrderEvent value) autoAssignOrder,
     required TResult Function(ChangeTransporterEvent value) changeTransporter,
     required TResult Function(CancelOrderEvent value) cancelOrder,
     required TResult Function(BulkUpdateStatusEvent value) bulkUpdateStatus,
@@ -9896,11 +12698,15 @@ class _$LoadTodayOrdersEventImpl implements LoadTodayOrdersEvent {
     TResult? Function(LoadOrdersEvent value)? loadOrders,
     TResult? Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult? Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult? Function(GetOrderByIdEvent value)? getOrderById,
+    TResult? Function(DeleteOrderEvent value)? deleteOrder,
     TResult? Function(ApplyFilterEvent value)? applyFilter,
     TResult? Function(ClearFilterEvent value)? clearFilter,
     TResult? Function(SearchOrdersEvent value)? searchOrders,
     TResult? Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult? Function(AssignTransporterEvent value)? assignTransporter,
+    TResult? Function(AssignOrderEvent value)? assignOrder,
+    TResult? Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult? Function(ChangeTransporterEvent value)? changeTransporter,
     TResult? Function(CancelOrderEvent value)? cancelOrder,
     TResult? Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,
@@ -9929,11 +12735,15 @@ class _$LoadTodayOrdersEventImpl implements LoadTodayOrdersEvent {
     TResult Function(LoadOrdersEvent value)? loadOrders,
     TResult Function(LoadMoreOrdersEvent value)? loadMoreOrders,
     TResult Function(RefreshOrdersEvent value)? refreshOrders,
+    TResult Function(GetOrderByIdEvent value)? getOrderById,
+    TResult Function(DeleteOrderEvent value)? deleteOrder,
     TResult Function(ApplyFilterEvent value)? applyFilter,
     TResult Function(ClearFilterEvent value)? clearFilter,
     TResult Function(SearchOrdersEvent value)? searchOrders,
     TResult Function(UpdateOrderStatusEvent value)? updateOrderStatus,
     TResult Function(AssignTransporterEvent value)? assignTransporter,
+    TResult Function(AssignOrderEvent value)? assignOrder,
+    TResult Function(AutoAssignOrderEvent value)? autoAssignOrder,
     TResult Function(ChangeTransporterEvent value)? changeTransporter,
     TResult Function(CancelOrderEvent value)? cancelOrder,
     TResult Function(BulkUpdateStatusEvent value)? bulkUpdateStatus,

@@ -752,7 +752,25 @@ class _OrdersFilterWidgetState extends State<OrdersFilterWidget>
     widget.onFilterChanged?.call(filter);
     
     // Apply filter to orders bloc
-    context.read<OrdersBloc>().add(OrdersEvent.applyFilter(filter: filter));
+    filter.when(
+      (status, cityId, fromDate, toDate, search, unassignedOnly, overdueOnly, priorityOnly, todayOnly, minValue) {
+        context.read<OrdersBloc>().add(OrdersEvent.applyFilter(
+          status: status,
+          cityId: cityId,
+          fromDate: fromDate,
+          toDate: toDate,
+          search: search,
+          unassignedOnly: unassignedOnly,
+          overdueOnly: overdueOnly,
+          priorityOnly: priorityOnly,
+          todayOnly: todayOnly,
+          minValue: minValue,
+        ));
+      },
+      empty: () {
+        context.read<OrdersBloc>().add(const OrdersEvent.clearFilter());
+      },
+    );
   }
 
   int _getActiveFiltersCount() {

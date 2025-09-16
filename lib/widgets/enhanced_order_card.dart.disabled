@@ -131,7 +131,7 @@ class _EnhancedOrderCardState extends State<EnhancedOrderCard> with SignalRConne
                   ),
                 ),
                 Text(
-                  '${widget.order.clientName} • ${widget.order.city?.name ?? "Ville inconnue"}',
+                  '${widget.order.clientName} • ${widget.order.city?['name'] ?? "Ville inconnue"}',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -164,7 +164,7 @@ class _EnhancedOrderCardState extends State<EnhancedOrderCard> with SignalRConne
               _buildHeader(context, theme),
               const SizedBox(height: 12),
               _buildOrderInfo(context, theme),
-              if (widget.order.transporter != null) ...[
+              if (widget.order.hasTransporter) ...[
                 const SizedBox(height: 12),
                 _buildTransporterInfo(context, theme),
               ],
@@ -192,7 +192,7 @@ class _EnhancedOrderCardState extends State<EnhancedOrderCard> with SignalRConne
           _buildOrderInfo(context, theme),
           const SizedBox(height: 16),
           _buildLocationInfo(context, theme),
-          if (widget.order.transporter != null) ...[
+          if (widget.order.hasTransporter) ...[
             const SizedBox(height: 16),
             _buildTransporterInfo(context, theme),
           ],
@@ -226,7 +226,7 @@ class _EnhancedOrderCardState extends State<EnhancedOrderCard> with SignalRConne
                       color: theme.colorScheme.onSurface,
                     ),
                   ),
-                  if (widget.order.isPriority) ...[
+                  if (widget.order.isPriority == true) ...[
                     const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -317,7 +317,7 @@ class _EnhancedOrderCardState extends State<EnhancedOrderCard> with SignalRConne
           context,
           icon: Icons.location_on_outlined,
           label: 'Destination',
-          value: '${widget.order.city?.name ?? "Ville inconnue"} • ${widget.order.address}',
+          value: '${widget.order.city?['name'] ?? "Ville inconnue"} • ${widget.order.address ?? "Adresse inconnue"}',
           theme: theme,
         ),
         const SizedBox(height: 8),
@@ -328,13 +328,13 @@ class _EnhancedOrderCardState extends State<EnhancedOrderCard> with SignalRConne
           value: widget.order.clientPhone,
           theme: theme,
         ),
-        if (widget.order.notes.isNotEmpty) ...[
+        if (widget.order.notes?.isNotEmpty == true) ...[
           const SizedBox(height: 8),
           _buildInfoRow(
             context,
             icon: Icons.note_outlined,
             label: 'Notes',
-            value: widget.order.notes,
+            value: widget.order.notes ?? '',
             theme: theme,
             maxLines: 2,
           ),

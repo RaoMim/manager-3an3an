@@ -21,6 +21,10 @@ sealed class OrdersEvent with _$OrdersEvent {
 
   const factory OrdersEvent.refreshOrders() = RefreshOrdersEvent;
 
+  const factory OrdersEvent.getOrderById({required int orderId}) = GetOrderByIdEvent;
+
+  const factory OrdersEvent.deleteOrder({required int orderId}) = DeleteOrderEvent;
+
   // Filter events
   const factory OrdersEvent.applyFilter({
     String? status,
@@ -28,6 +32,11 @@ sealed class OrdersEvent with _$OrdersEvent {
     DateTime? fromDate,
     DateTime? toDate,
     String? search,
+    @Default(false) bool unassignedOnly,
+    @Default(false) bool overdueOnly,
+    @Default(false) bool priorityOnly,
+    @Default(false) bool todayOnly,
+    double? minValue,
   }) = ApplyFilterEvent;
 
   const factory OrdersEvent.clearFilter() = ClearFilterEvent;
@@ -45,6 +54,15 @@ sealed class OrdersEvent with _$OrdersEvent {
     required int orderId,
     required int transporterId,
   }) = AssignTransporterEvent;
+
+  const factory OrdersEvent.assignOrder({
+    required int orderId,
+    required int transporterId,
+  }) = AssignOrderEvent;
+
+  const factory OrdersEvent.autoAssignOrder({
+    required int orderId,
+  }) = AutoAssignOrderEvent;
 
   const factory OrdersEvent.changeTransporter({
     required int orderId,

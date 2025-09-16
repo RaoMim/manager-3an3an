@@ -81,7 +81,7 @@ class OrderCard extends StatelessWidget {
     Color backgroundColor;
     Color textColor = Colors.white;
     
-    switch (order.status.toLowerCase()) {
+    switch (order.status.value.toLowerCase()) {
       case 'pending':
         backgroundColor = Colors.orange;
         break;

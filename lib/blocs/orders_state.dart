@@ -100,6 +100,7 @@ sealed class OrdersFilter with _$OrdersFilter {
   const factory OrdersFilter.empty() = _OrdersFilterEmpty;
 }
 
+
 @freezed
 sealed class OrderSortConfig with _$OrderSortConfig {
   const factory OrderSortConfig({
@@ -170,8 +171,8 @@ extension OrdersStateX on OrdersState {
       loaded: (_, __, ___, ____, selectedIds, _____, ______, _______) => selectedIds,
       error: (_, __, ___) => [],
       actionInProgress: (_, __, ___, ____, _____, selectedIds, ______) => selectedIds,
-      actionSuccess: (_, __, ___, ____, _____, selectedIds, ______) => selectedIds,
-      actionError: (_, __, ___, ____, _____, selectedIds, ______) => selectedIds,
+      actionSuccess: (_, __, ___, ____, _____, ______, selectedIds) => selectedIds,
+      actionError: (_, __, ___, ____, _____, ______, selectedIds) => selectedIds,
       exporting: (_, __, ___) => [],
       exportSuccess: (_, __, ___, ____) => [],
       exportError: (_, __, ___, ____) => [],
@@ -288,5 +289,26 @@ extension OrdersFilterX on OrdersFilter {
     );
 
     return filters.isEmpty ? 'Aucun filtre' : filters.join(', ');
+  }
+
+  /// Get the count of active filters
+  int get activeFiltersCount {
+    return when(
+      (status, cityId, fromDate, toDate, search, unassignedOnly, overdueOnly, priorityOnly, todayOnly, minValue) {
+        int count = 0;
+        if (status != null && status!.isNotEmpty) count++;
+        if (cityId != null && cityId! > 0) count++;
+        if (fromDate != null) count++;
+        if (toDate != null) count++;
+        if (search != null && search!.isNotEmpty) count++;
+        if (unassignedOnly) count++;
+        if (overdueOnly) count++;
+        if (priorityOnly) count++;
+        if (todayOnly) count++;
+        if (minValue != null && minValue! > 0) count++;
+        return count;
+      },
+      empty: () => 0,
+    );
   }
 }

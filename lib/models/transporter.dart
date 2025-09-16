@@ -75,6 +75,43 @@ class Transporter {
     };
   }
 
+  /// Create a copy of this transporter with some fields updated
+  Transporter copyWith({
+    int? id,
+    String? name,
+    String? phone,
+    String? email,
+    String? status,
+    bool? blocked,
+    double? latitude,
+    double? longitude,
+    int? cityId,
+    String? cityName,
+    DateTime? createdAt,
+    DateTime? lastActiveAt,
+    double? commission,
+    int? totalDeliveries,
+    double? rating,
+  }) {
+    return Transporter(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      phone: phone ?? this.phone,
+      email: email ?? this.email,
+      status: status ?? this.status,
+      blocked: blocked ?? this.blocked,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      cityId: cityId ?? this.cityId,
+      cityName: cityName ?? this.cityName,
+      createdAt: createdAt ?? this.createdAt,
+      lastActiveAt: lastActiveAt ?? this.lastActiveAt,
+      commission: commission ?? this.commission,
+      totalDeliveries: totalDeliveries ?? this.totalDeliveries,
+      rating: rating ?? this.rating,
+    );
+  }
+
   /// Check if transporter is available for assignment
   bool get isAvailable {
     return status.toLowerCase() == 'en ligne' && !blocked;

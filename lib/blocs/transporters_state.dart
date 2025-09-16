@@ -142,8 +142,8 @@ extension TransportersStateX on TransportersState {
       loaded: (_, __, ___, ____, selectedIds, _____, ______, _______) => selectedIds,
       error: (_, __, ___) => [],
       actionInProgress: (_, __, ___, ____, _____, selectedIds, ______) => selectedIds,
-      actionSuccess: (_, __, ___, ____, _____, selectedIds, ______) => selectedIds,
-      actionError: (_, __, ___, ____, _____, selectedIds, ______) => selectedIds,
+      actionSuccess: (_, __, ___, ____, _____, ______, selectedIds) => selectedIds,
+      actionError: (_, __, ___, ____, _____, ______, selectedIds) => selectedIds,
     );
   }
 

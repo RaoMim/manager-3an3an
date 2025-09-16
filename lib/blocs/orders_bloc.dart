@@ -130,14 +130,31 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       final nextPage = loadedState.currentPage + 1;
       final filter = loadedState.filter;
 
+      String? status;
+      String? search;
+      int? cityId;
+      DateTime? fromDate;
+      DateTime? toDate;
+      
+      filter.when(
+        (filterStatus, filterCityId, filterFromDate, filterToDate, filterSearch, unassignedOnly, overdueOnly, priorityOnly, todayOnly, minValue) {
+          status = filterStatus;
+          search = filterSearch;
+          cityId = filterCityId;
+          fromDate = filterFromDate;
+          toDate = filterToDate;
+        },
+        empty: () {},
+      );
+
       final response = await _ordersService.getOrders(
         page: nextPage,
         pageSize: loadedState.pageSize,
-        status: filter.status,
-        search: filter.search,
-        cityId: filter.cityId,
-        fromDate: filter.fromDate,
-        toDate: filter.toDate,
+        status: status,
+        search: search,
+        cityId: cityId,
+        fromDate: fromDate,
+        toDate: toDate,
       );
 
       if (response.isSuccess && response.data != null) {
@@ -175,14 +192,32 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
   Future<void> _onRefreshOrders(RefreshOrdersEvent event, Emitter<OrdersState> emit) async {
     if (state is OrdersLoaded) {
       final loadedState = state as OrdersLoaded;
+      
+      String? status;
+      String? search;
+      int? cityId;
+      DateTime? fromDate;
+      DateTime? toDate;
+      
+      loadedState.filter.when(
+        (filterStatus, filterCityId, filterFromDate, filterToDate, filterSearch, unassignedOnly, overdueOnly, priorityOnly, todayOnly, minValue) {
+          status = filterStatus;
+          search = filterSearch;
+          cityId = filterCityId;
+          fromDate = filterFromDate;
+          toDate = filterToDate;
+        },
+        empty: () {},
+      );
+      
       add(OrdersEvent.loadOrders(
         page: 1,
         pageSize: loadedState.pageSize,
-        status: loadedState.filter.status,
-        search: loadedState.filter.search,
-        cityId: loadedState.filter.cityId,
-        fromDate: loadedState.filter.fromDate,
-        toDate: loadedState.filter.toDate,
+        status: status,
+        search: search,
+        cityId: cityId,
+        fromDate: fromDate,
+        toDate: toDate,
         isRefresh: true,
       ));
     } else {
@@ -740,7 +775,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
           comparison = a.totalPrice.compareTo(b.totalPrice);
           break;
         case 'status':
-          comparison = a.status.compareTo(b.status);
+          comparison = a.status.index.compareTo(b.status.index);
           break;
         case 'clientName':
           comparison = a.clientName.compareTo(b.clientName);

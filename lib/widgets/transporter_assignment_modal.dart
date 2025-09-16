@@ -82,7 +82,7 @@ class _TransporterAssignmentModalState extends State<TransporterAssignmentModal>
   void _loadAvailableTransporters() {
     context.read<TransportersBloc>().add(
       TransportersEvent.loadAvailableTransporters(
-        cityId: widget.order.city?.id,
+        cityId: widget.order.cityId,
         latitude: widget.order.latitude,
         longitude: widget.order.longitude,
         maxDistanceKm: 15.0, // Default 15km radius

@@ -1,5 +1,112 @@
 import 'package:intl/intl.dart';
 
+enum OrderStatus {
+  nouvelle,
+  confirmee,
+  enCoursVendeur,
+  enCoursLivreur,
+  livree,
+  annulee,
+  retournee,
+  pending,
+  confirmed,
+  preparing,
+  ready,
+  assigned,
+  pickedUp,
+  inDelivery,
+  delivered,
+  returned,
+  cancelled,
+  inTransit,
+}
+
+extension OrderStatusExtension on OrderStatus {
+  String get value {
+    switch (this) {
+      case OrderStatus.nouvelle:
+        return 'nouvelle';
+      case OrderStatus.confirmee:
+        return 'confirmée';
+      case OrderStatus.enCoursVendeur:
+        return 'en cours - vendeur';
+      case OrderStatus.enCoursLivreur:
+        return 'en cours - livreur';
+      case OrderStatus.livree:
+        return 'livrée';
+      case OrderStatus.annulee:
+        return 'annulée';
+      case OrderStatus.retournee:
+        return 'retournée';
+      case OrderStatus.pending:
+        return 'pending';
+      case OrderStatus.confirmed:
+        return 'confirmed';
+      case OrderStatus.preparing:
+        return 'preparing';
+      case OrderStatus.ready:
+        return 'ready';
+      case OrderStatus.assigned:
+        return 'assigned';
+      case OrderStatus.pickedUp:
+        return 'picked_up';
+      case OrderStatus.inDelivery:
+        return 'in_delivery';
+      case OrderStatus.delivered:
+        return 'delivered';
+      case OrderStatus.returned:
+        return 'returned';
+      case OrderStatus.cancelled:
+        return 'cancelled';
+      case OrderStatus.inTransit:
+        return 'in_transit';
+    }
+  }
+
+  static OrderStatus fromString(String status) {
+    switch (status.toLowerCase()) {
+      case 'nouvelle':
+        return OrderStatus.nouvelle;
+      case 'confirmée':
+        return OrderStatus.confirmee;
+      case 'en cours - vendeur':
+        return OrderStatus.enCoursVendeur;
+      case 'en cours - livreur':
+        return OrderStatus.enCoursLivreur;
+      case 'livrée':
+        return OrderStatus.livree;
+      case 'annulée':
+        return OrderStatus.annulee;
+      case 'retournée':
+        return OrderStatus.retournee;
+      case 'pending':
+        return OrderStatus.pending;
+      case 'confirmed':
+        return OrderStatus.confirmed;
+      case 'preparing':
+        return OrderStatus.preparing;
+      case 'ready':
+        return OrderStatus.ready;
+      case 'assigned':
+        return OrderStatus.assigned;
+      case 'picked_up':
+        return OrderStatus.pickedUp;
+      case 'in_delivery':
+        return OrderStatus.inDelivery;
+      case 'delivered':
+        return OrderStatus.delivered;
+      case 'returned':
+        return OrderStatus.returned;
+      case 'cancelled':
+        return OrderStatus.cancelled;
+      case 'in_transit':
+        return OrderStatus.inTransit;
+      default:
+        return OrderStatus.pending;
+    }
+  }
+}
+
 class Order {
   final int id;
   final String tracking;
@@ -38,7 +145,7 @@ class Order {
   final double deliveryPriceToPay;
   
   // Status and tracking
-  final String status;
+  final OrderStatus status;
   final String? note;
   final DateTime? estimatedDeliveryTime;
   final String? trackingCode;
@@ -51,6 +158,16 @@ class Order {
   final String? cityName;
   final double? latitude;
   final double? longitude;
+
+  // Additional fields from .NET API
+  final String? address;
+  final String? notes;
+  final DateTime? updatedAt;
+  final DateTime? deliveredAt;
+  final double? subtotalAmount;
+  final double? deliveryFee;
+  final double? discount;
+  final bool? isPriority;
 
   Order({
     required this.id,
@@ -103,17 +220,27 @@ class Order {
     this.cityName,
     this.latitude,
     this.longitude,
+
+    // Additional fields from .NET API
+    this.address,
+    this.notes,
+    this.updatedAt,
+    this.deliveredAt,
+    this.subtotalAmount,
+    this.deliveryFee,
+    this.discount,
+    this.isPriority,
   });
 
   factory Order.fromJson(Map<String, dynamic> json) {
     // Extract order items handling JSON.NET $values structure from SignalR
-    List<dynamic> orderItemsRaw = json['OrderItems'] ?? json['orderItems'] ?? [];
-    if (orderItemsRaw is Map && orderItemsRaw['\$values'] != null) {
-      orderItemsRaw = orderItemsRaw['\$values'];
+    dynamic orderItemsRaw = json['OrderItems'] ?? json['orderItems'] ?? [];
+    if (orderItemsRaw is Map<String, dynamic> && orderItemsRaw.containsKey(r'$values')) {
+      orderItemsRaw = orderItemsRaw[r'$values'];
     }
     
     // Filter out any $ref items (JSON.NET circular reference handling)
-    final validItems = (orderItemsRaw as List).where((item) => item != null && item['\$ref'] == null).toList();
+    final validItems = (orderItemsRaw as List).where((item) => item != null && item[r'$ref'] == null).toList();
     
     return Order(
       id: json['id'] ?? json['Id'] ?? 0,
@@ -153,7 +280,7 @@ class Order {
       deliveryPriceToPay: (json['deliveryPriceToPay'] ?? json['DeliveryPriceToPay'] ?? 0).toDouble(),
       
       // Status and tracking
-      status: json['status'] ?? json['Status'] ?? 'N/A',
+      status: OrderStatusExtension.fromString(json['status'] ?? json['Status'] ?? 'pending'),
       note: json['note'] ?? json['Note'],
       estimatedDeliveryTime: json['EstimatedDeliveryTime'] != null || json['estimatedDeliveryTime'] != null
           ? DateTime.parse(json['EstimatedDeliveryTime'] ?? json['estimatedDeliveryTime'])
@@ -168,6 +295,20 @@ class Order {
       cityName: json['cityName'] ?? json['CityName'],
       latitude: (json['latitude'] ?? json['Latitude'])?.toDouble(),
       longitude: (json['longitude'] ?? json['Longitude'])?.toDouble(),
+
+      // Additional fields from .NET API
+      address: json['address'] ?? json['Address'],
+      notes: json['notes'] ?? json['Notes'],
+      updatedAt: json['UpdatedAt'] != null || json['updatedAt'] != null
+          ? DateTime.parse(json['UpdatedAt'] ?? json['updatedAt'])
+          : null,
+      deliveredAt: json['DeliveredAt'] != null || json['deliveredAt'] != null
+          ? DateTime.parse(json['DeliveredAt'] ?? json['deliveredAt'])
+          : null,
+      subtotalAmount: (json['subtotalAmount'] ?? json['SubtotalAmount'] ?? json['totalPrice'] ?? json['TotalPrice'] ?? 0).toDouble(),
+      deliveryFee: (json['deliveryFee'] ?? json['DeliveryFee'] ?? json['deliveryPrice'] ?? json['DeliveryPrice'] ?? 0).toDouble(),
+      discount: (json['discount'] ?? json['Discount'] ?? 0).toDouble(),
+      isPriority: json['isPriority'] ?? json['IsPriority'] ?? false,
     );
   }
 
@@ -210,7 +351,7 @@ class Order {
       'DeliveryPriceToPay': deliveryPriceToPay,
       
       // Status and tracking
-      'Status': status,
+      'Status': status.value,
       'Note': note,
       'EstimatedDeliveryTime': estimatedDeliveryTime?.toIso8601String(),
       'TrackingCode': trackingCode,
@@ -223,11 +364,31 @@ class Order {
       'CityName': cityName,
       'Latitude': latitude,
       'Longitude': longitude,
+
+      // Additional fields
+      'Address': address,
+      'Notes': notes,
+      'UpdatedAt': updatedAt?.toIso8601String(),
+      'DeliveredAt': deliveredAt?.toIso8601String(),
+      'SubtotalAmount': subtotalAmount,
+      'DeliveryFee': deliveryFee,
+      'Discount': discount,
+      'IsPriority': isPriority,
     };
   }
 
   String get formattedCreatedAt {
     return DateFormat('dd/MM/yyyy HH:mm').format(createdAt);
+  }
+
+  /// Get order number - using tracking as order number
+  String get orderNumber {
+    return tracking;
+  }
+
+  /// Get total amount - alias for totalPriceToPay
+  double get totalAmount {
+    return totalPriceToPay;
   }
 
   String get formattedTotalPrice {
@@ -251,48 +412,55 @@ class Order {
   }
 
   String get statusDisplayName {
-    switch (status.toLowerCase()) {
-      case 'nouvelle':
+    switch (status) {
+      case OrderStatus.nouvelle:
         return 'Nouvelle';
-      case 'confirmée':
+      case OrderStatus.confirmee:
         return 'Confirmée';
-      case 'en cours - vendeur':
+      case OrderStatus.enCoursVendeur:
         return 'En cours - Vendeur';
-      case 'en cours - livreur':
+      case OrderStatus.enCoursLivreur:
         return 'En cours - Livreur';
-      case 'livrée':
+      case OrderStatus.livree:
         return 'Livrée';
-      case 'annulée':
+      case OrderStatus.annulee:
         return 'Annulée';
-      case 'retournée':
+      case OrderStatus.retournee:
         return 'Retournée';
-      case 'pending':
+      case OrderStatus.pending:
         return 'En attente';
-      case 'confirmed':
+      case OrderStatus.confirmed:
         return 'Confirmée';
-      case 'preparing':
+      case OrderStatus.preparing:
         return 'En préparation';
-      case 'ready':
+      case OrderStatus.ready:
         return 'Prête';
-      case 'assigned':
+      case OrderStatus.assigned:
         return 'Assignée';
-      case 'picked_up':
+      case OrderStatus.pickedUp:
         return 'Récupérée';
-      case 'in_delivery':
+      case OrderStatus.inDelivery:
         return 'En livraison';
-      case 'delivered':
+      case OrderStatus.delivered:
         return 'Livrée';
-      case 'returned':
+      case OrderStatus.returned:
         return 'Retournée';
-      case 'cancelled':
+      case OrderStatus.cancelled:
         return 'Annulée';
-      default:
-        return status;
+      case OrderStatus.inTransit:
+        return 'En transit';
     }
   }
 
   bool get isCompleted {
-    return ['delivered', 'returned', 'cancelled', 'livrée', 'retournée', 'annulée'].contains(status.toLowerCase());
+    return [
+      OrderStatus.delivered,
+      OrderStatus.returned,
+      OrderStatus.cancelled,
+      OrderStatus.livree,
+      OrderStatus.retournee,
+      OrderStatus.annulee
+    ].contains(status);
   }
 
   bool get isActive {
@@ -306,36 +474,59 @@ class Order {
 
   /// Check if this order is new/pending and needs action
   bool get needsAction {
-    return ['nouvelle', 'pending'].contains(status.toLowerCase());
+    return [OrderStatus.nouvelle, OrderStatus.pending].contains(status);
   }
 
   /// Get the primary status color for UI display
   String get statusColor {
-    switch (status.toLowerCase()) {
-      case 'nouvelle':
-      case 'pending':
+    switch (status) {
+      case OrderStatus.nouvelle:
+      case OrderStatus.pending:
         return '#FFA726'; // Orange
-      case 'confirmée':
-      case 'confirmed':
+      case OrderStatus.confirmee:
+      case OrderStatus.confirmed:
         return '#42A5F5'; // Blue
-      case 'en cours - vendeur':
-      case 'preparing':
+      case OrderStatus.enCoursVendeur:
+      case OrderStatus.preparing:
         return '#AB47BC'; // Purple
-      case 'en cours - livreur':
-      case 'in_delivery':
+      case OrderStatus.enCoursLivreur:
+      case OrderStatus.inDelivery:
         return '#29B6F6'; // Light blue
-      case 'livrée':
-      case 'delivered':
+      case OrderStatus.livree:
+      case OrderStatus.delivered:
         return '#66BB6A'; // Green
-      case 'retournée':
-      case 'returned':
+      case OrderStatus.retournee:
+      case OrderStatus.returned:
         return '#FF7043'; // Deep orange
-      case 'annulée':
-      case 'cancelled':
+      case OrderStatus.annulee:
+      case OrderStatus.cancelled:
         return '#EF5350'; // Red
       default:
         return '#9E9E9E'; // Grey
     }
+  }
+
+  /// Check if this order can be assigned to a transporter
+  bool get canAssign {
+    return [OrderStatus.nouvelle, OrderStatus.pending, OrderStatus.confirmed].contains(status);
+  }
+
+  /// Check if this order can be cancelled
+  bool get canCancel {
+    return !isCompleted && status != OrderStatus.cancelled;
+  }
+
+  /// Check if this order can be marked as complete
+  bool get canComplete {
+    return [OrderStatus.inDelivery, OrderStatus.enCoursLivreur].contains(status);
+  }
+
+  /// Get a placeholder city object for compatibility
+  Map<String, dynamic>? get city {
+    if (cityName != null) {
+      return {'name': cityName};
+    }
+    return null;
   }
 }
 
@@ -348,6 +539,9 @@ class OrderItem {
   final String? note;
   final List<OrderItemOption> options;
   final List<OrderItemSupplement> supplements;
+
+  /// Alias for note to maintain compatibility
+  String get notes => note ?? '';
 
   OrderItem({
     required this.id,
