@@ -1,0 +1,47 @@
+### Test Manager FCM Token Registration
+
+# First, authenticate as manager to get JWT token
+POST https://akl.3an3an.ma/api/Manager/auth
+Content-Type: application/json
+
+{
+  "Phone": "0612345678",
+  "Password": "test123"
+}
+
+### Register FCM Token for Manager
+POST https://akl.3an3an.ma/api/Notification/manager/register-token
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "token": "test_fcm_token_123456789",
+  "deviceInfo": "android"
+}
+
+### Get Manager FCM Tokens
+GET https://akl.3an3an.ma/api/Notification/manager/tokens
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+### Test Manager Notification
+POST https://akl.3an3an.ma/api/Notification/manager/test-notification
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "title": "Test Notification",
+  "body": "This is a test notification for manager",
+  "data": {
+    "test": "value"
+  }
+}
+
+### Unregister FCM Token
+POST https://akl.3an3an.ma/api/Notification/manager/unregister-token
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "token": "test_fcm_token_123456789"
+}

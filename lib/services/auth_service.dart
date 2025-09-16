@@ -71,14 +71,21 @@ class AuthService {
           // Store token and manager info
           await _storeAuthData(authResponse.token!, authResponse.manager);
           
-          // Register FCM token with backend
+          // Initialize FCM and register token with backend
           try {
+            print('🔄 Initializing FCM and registering token after successful login');
+            
+            // First initialize FCM
+            await FirebaseNotificationsHelper().initializeFCM();
+            print('✅ FCM initialized successfully');
+            
+            // Then send token to backend
             await FirebaseNotificationsHelper().sendTokenToBackend(authResponse.token!);
+            print('✅ FCM token registration completed');
           } catch (e) {
             // Don't fail login if FCM registration fails
-            if (kDebugMode) {
-              print('Failed to register FCM token: $e');
-            }
+            print('🔴 Failed to register FCM token: $e');
+            print('   ⚠️  Login will continue despite FCM failure');
           }
           
           return authResponse;

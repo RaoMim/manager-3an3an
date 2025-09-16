@@ -1,0 +1,817 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
+import '../models/order.dart';
+import '../models/city.dart';
+import '../models/transporter.dart';
+import '../blocs/orders_bloc.dart';
+import '../blocs/orders_event.dart';
+import '../blocs/orders_state.dart';
+import '../services/city_service.dart';
+import '../services/transporter_service.dart';
+
+/// Advanced filtering widget for orders with Material Design 3
+class OrdersFilterWidget extends StatefulWidget {
+  final OrdersFilter initialFilter;
+  final Function(OrdersFilter)? onFilterChanged;
+  final VoidCallback? onClose;
+  final bool isExpanded;
+
+  const OrdersFilterWidget({
+    super.key,
+    required this.initialFilter,
+    this.onFilterChanged,
+    this.onClose,
+    this.isExpanded = false,
+  });
+
+  @override
+  State<OrdersFilterWidget> createState() => _OrdersFilterWidgetState();
+}
+
+class _OrdersFilterWidgetState extends State<OrdersFilterWidget>
+    with TickerProviderStateMixin {
+  late final AnimationController _animationController;
+  late final Animation<double> _expandAnimation;
+  
+  final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _minAmountController = TextEditingController();
+  final TextEditingController _maxAmountController = TextEditingController();
+  
+  // Filter state
+  Set<OrderStatus> _selectedStatuses = {};
+  City? _selectedCity;
+  DateTime? _fromDate;
+  DateTime? _toDate;
+  bool? _isAssigned;
+  bool _priorityOnly = false;
+  String _searchQuery = '';
+  double? _minAmount;
+  double? _maxAmount;
+  
+  // Data
+  List<City> _cities = [];
+  bool _isLoadingCities = false;
+  
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _expandAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
+    
+    _initializeFromFilter();
+    _loadCities();
+    
+    if (widget.isExpanded) {
+      _animationController.forward();
+    }
+  }
+
+  void _initializeFromFilter() {
+    final filter = widget.initialFilter;
+    _selectedStatuses = Set.from(filter.statuses ?? []);
+    _selectedCity = filter.city;
+    _fromDate = filter.fromDate;
+    _toDate = filter.toDate;
+    _isAssigned = filter.isAssigned;
+    _priorityOnly = filter.priorityOnly ?? false;
+    _searchQuery = filter.search ?? '';
+    _minAmount = filter.minAmount;
+    _maxAmount = filter.maxAmount;
+    
+    _searchController.text = _searchQuery;
+    if (_minAmount != null) {
+      _minAmountController.text = _minAmount!.toStringAsFixed(2);
+    }
+    if (_maxAmount != null) {
+      _maxAmountController.text = _maxAmount!.toStringAsFixed(2);
+    }
+  }
+
+  Future<void> _loadCities() async {
+    setState(() => _isLoadingCities = true);
+    
+    try {
+      final cityService = context.read<CityService>();
+      final response = await cityService.getCities();
+      
+      if (response.isSuccess && response.data != null) {
+        setState(() {
+          _cities = response.data!;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading cities: $e');
+    } finally {
+      setState(() => _isLoadingCities = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return Card(
+      elevation: 0,
+      color: theme.colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: theme.colorScheme.outline.withOpacity(0.2),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHeader(context, theme),
+          AnimatedBuilder(
+            animation: _expandAnimation,
+            builder: (context, child) {
+              return ClipRect(
+                child: Align(
+                  heightFactor: _expandAnimation.value,
+                  child: child,
+                ),
+              );
+            },
+            child: _buildFilterContent(context, theme),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, ThemeData theme) {
+    final activeFiltersCount = _getActiveFiltersCount();
+    
+    return InkWell(
+      onTap: _toggleExpansion,
+      borderRadius: const BorderRadius.only(
+        topLeft: Radius.circular(16),
+        topRight: Radius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            Icon(
+              Icons.filter_list,
+              color: theme.colorScheme.primary,
+              size: 24,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Filtres de recherche',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  if (activeFiltersCount > 0)
+                    Text(
+                      '$activeFiltersCount filtre${activeFiltersCount > 1 ? 's' : ''} actif${activeFiltersCount > 1 ? 's' : ''}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            if (activeFiltersCount > 0)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  activeFiltersCount.toString(),
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            const SizedBox(width: 8),
+            Icon(
+              _animationController.value > 0.5
+                  ? Icons.keyboard_arrow_up
+                  : Icons.keyboard_arrow_down,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            if (widget.onClose != null) ...[
+              const SizedBox(width: 8),
+              IconButton(
+                icon: Icon(
+                  Icons.close,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                onPressed: widget.onClose,
+                tooltip: 'Fermer',
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterContent(BuildContext context, ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Divider(),
+          const SizedBox(height: 16),
+          
+          // Search
+          _buildSearchField(context, theme),
+          const SizedBox(height: 24),
+          
+          // Status Filter
+          _buildStatusFilter(context, theme),
+          const SizedBox(height: 24),
+          
+          // City and Assignment Filters
+          Row(
+            children: [
+              Expanded(child: _buildCityFilter(context, theme)),
+              const SizedBox(width: 16),
+              Expanded(child: _buildAssignmentFilter(context, theme)),
+            ],
+          ),
+          const SizedBox(height: 24),
+          
+          // Date Range Filter
+          _buildDateRangeFilter(context, theme),
+          const SizedBox(height: 24),
+          
+          // Amount Range Filter
+          _buildAmountRangeFilter(context, theme),
+          const SizedBox(height: 24),
+          
+          // Additional Options
+          _buildAdditionalOptions(context, theme),
+          const SizedBox(height: 24),
+          
+          // Action Buttons
+          _buildActionButtons(context, theme),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchField(BuildContext context, ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Rechercher',
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _searchController,
+          decoration: InputDecoration(
+            hintText: 'Numéro de commande, nom du client, téléphone...',
+            prefixIcon: Icon(
+              Icons.search,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            suffixIcon: _searchController.text.isNotEmpty
+                ? IconButton(
+                    icon: Icon(
+                      Icons.clear,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    onPressed: () {
+                      _searchController.clear();
+                      setState(() => _searchQuery = '');
+                    },
+                  )
+                : null,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            filled: true,
+            fillColor: theme.colorScheme.surfaceContainerLow,
+          ),
+          onChanged: (value) {
+            setState(() => _searchQuery = value);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatusFilter(BuildContext context, ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Statut des commandes',
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: OrderStatus.values.map((status) {
+            final isSelected = _selectedStatuses.contains(status);
+            final statusInfo = _getStatusInfo(status);
+            
+            return FilterChip(
+              selected: isSelected,
+              onSelected: (selected) {
+                setState(() {
+                  if (selected) {
+                    _selectedStatuses.add(status);
+                  } else {
+                    _selectedStatuses.remove(status);
+                  }
+                });
+              },
+              avatar: Icon(
+                statusInfo.icon,
+                size: 18,
+                color: isSelected
+                    ? theme.colorScheme.onSecondaryContainer
+                    : statusInfo.color,
+              ),
+              label: Text(statusInfo.label),
+              backgroundColor: statusInfo.color.withOpacity(0.1),
+              selectedColor: theme.colorScheme.secondaryContainer,
+              checkmarkColor: theme.colorScheme.onSecondaryContainer,
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCityFilter(BuildContext context, ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Ville',
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<City>(
+          value: _selectedCity,
+          isExpanded: true,
+          decoration: InputDecoration(
+            hintText: 'Toutes les villes',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            filled: true,
+            fillColor: theme.colorScheme.surfaceContainerLow,
+          ),
+          items: [
+            const DropdownMenuItem<City>(
+              value: null,
+              child: Text('Toutes les villes'),
+            ),
+            ..._cities.map((city) {
+              return DropdownMenuItem<City>(
+                value: city,
+                child: Text(city.name),
+              );
+            }),
+          ],
+          onChanged: _isLoadingCities ? null : (city) {
+            setState(() => _selectedCity = city);
+          },
+        ),
+        if (_isLoadingCities)
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Chargement des villes...',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildAssignmentFilter(BuildContext context, ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Assignation',
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<bool?>(
+          value: _isAssigned,
+          isExpanded: true,
+          decoration: InputDecoration(
+            hintText: 'Tous',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            filled: true,
+            fillColor: theme.colorScheme.surfaceContainerLow,
+          ),
+          items: const [
+            DropdownMenuItem<bool?>(
+              value: null,
+              child: Text('Tous'),
+            ),
+            DropdownMenuItem<bool?>(
+              value: true,
+              child: Text('Assignées'),
+            ),
+            DropdownMenuItem<bool?>(
+              value: false,
+              child: Text('Non assignées'),
+            ),
+          ],
+          onChanged: (value) {
+            setState(() => _isAssigned = value);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDateRangeFilter(BuildContext context, ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Période',
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _buildDateField(
+                context,
+                theme,
+                'Date de début',
+                _fromDate,
+                (date) => setState(() => _fromDate = date),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildDateField(
+                context,
+                theme,
+                'Date de fin',
+                _toDate,
+                (date) => setState(() => _toDate = date),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDateField(
+    BuildContext context,
+    ThemeData theme,
+    String label,
+    DateTime? selectedDate,
+    Function(DateTime?) onDateSelected,
+  ) {
+    return InkWell(
+      onTap: () async {
+        final date = await showDatePicker(
+          context: context,
+          initialDate: selectedDate ?? DateTime.now(),
+          firstDate: DateTime(2020),
+          lastDate: DateTime.now().add(const Duration(days: 365)),
+        );
+        if (date != null) {
+          onDateSelected(date);
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerLow,
+          border: Border.all(
+            color: theme.colorScheme.outline.withOpacity(0.5),
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.calendar_today,
+              size: 18,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                selectedDate != null
+                    ? DateFormat('dd/MM/yyyy').format(selectedDate)
+                    : label,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: selectedDate != null
+                      ? theme.colorScheme.onSurface
+                      : theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            if (selectedDate != null)
+              InkWell(
+                onTap: () => onDateSelected(null),
+                child: Icon(
+                  Icons.clear,
+                  size: 18,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAmountRangeFilter(BuildContext context, ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Montant (DH)',
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _minAmountController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: 'Minimum',
+                  prefixText: 'DH ',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: theme.colorScheme.surfaceContainerLow,
+                ),
+                onChanged: (value) {
+                  _minAmount = double.tryParse(value);
+                },
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: TextField(
+                controller: _maxAmountController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: 'Maximum',
+                  prefixText: 'DH ',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: theme.colorScheme.surfaceContainerLow,
+                ),
+                onChanged: (value) {
+                  _maxAmount = double.tryParse(value);
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAdditionalOptions(BuildContext context, ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Options supplémentaires',
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: 8),
+        CheckboxListTile(
+          value: _priorityOnly,
+          onChanged: (value) {
+            setState(() => _priorityOnly = value ?? false);
+          },
+          title: Text(
+            'Commandes prioritaires uniquement',
+            style: theme.textTheme.bodyMedium,
+          ),
+          subtitle: Text(
+            'Afficher seulement les commandes marquées comme urgentes',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          contentPadding: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButtons(BuildContext context, ThemeData theme) {
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: _clearFilters,
+            icon: const Icon(Icons.clear_all),
+            label: const Text('Effacer tout'),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          flex: 2,
+          child: FilledButton.icon(
+            onPressed: _applyFilters,
+            icon: const Icon(Icons.check),
+            label: Text('Appliquer${_getActiveFiltersCount() > 0 ? ' (${_getActiveFiltersCount()})' : ''}'),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _toggleExpansion() {
+    if (_animationController.value > 0.5) {
+      _animationController.reverse();
+    } else {
+      _animationController.forward();
+    }
+  }
+
+  void _clearFilters() {
+    setState(() {
+      _selectedStatuses.clear();
+      _selectedCity = null;
+      _fromDate = null;
+      _toDate = null;
+      _isAssigned = null;
+      _priorityOnly = false;
+      _searchQuery = '';
+      _minAmount = null;
+      _maxAmount = null;
+      
+      _searchController.clear();
+      _minAmountController.clear();
+      _maxAmountController.clear();
+    });
+    
+    _applyFilters();
+  }
+
+  void _applyFilters() {
+    final filter = OrdersFilter(
+      statuses: _selectedStatuses.isEmpty ? null : _selectedStatuses.toList(),
+      city: _selectedCity,
+      fromDate: _fromDate,
+      toDate: _toDate,
+      isAssigned: _isAssigned,
+      priorityOnly: _priorityOnly ? true : null,
+      search: _searchQuery.isEmpty ? null : _searchQuery,
+      minAmount: _minAmount,
+      maxAmount: _maxAmount,
+    );
+    
+    widget.onFilterChanged?.call(filter);
+    
+    // Apply filter to orders bloc
+    context.read<OrdersBloc>().add(OrdersEvent.applyFilter(filter: filter));
+  }
+
+  int _getActiveFiltersCount() {
+    int count = 0;
+    
+    if (_selectedStatuses.isNotEmpty) count++;
+    if (_selectedCity != null) count++;
+    if (_fromDate != null) count++;
+    if (_toDate != null) count++;
+    if (_isAssigned != null) count++;
+    if (_priorityOnly) count++;
+    if (_searchQuery.isNotEmpty) count++;
+    if (_minAmount != null) count++;
+    if (_maxAmount != null) count++;
+    
+    return count;
+  }
+
+  ({String label, Color color, IconData icon}) _getStatusInfo(OrderStatus status) {
+    return status.when(
+      pending: () => (
+        label: 'En attente',
+        color: Colors.orange,
+        icon: Icons.pending_outlined,
+      ),
+      assigned: () => (
+        label: 'Assignée',
+        color: Colors.blue,
+        icon: Icons.person_outlined,
+      ),
+      inTransit: () => (
+        label: 'En transit',
+        color: Colors.purple,
+        icon: Icons.local_shipping_outlined,
+      ),
+      delivered: () => (
+        label: 'Livrée',
+        color: Colors.green,
+        icon: Icons.check_circle_outlined,
+      ),
+      canceled: () => (
+        label: 'Annulée',
+        color: Colors.red,
+        icon: Icons.cancel_outlined,
+      ),
+      returned: () => (
+        label: 'Retournée',
+        color: Colors.grey,
+        icon: Icons.keyboard_return_outlined,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    _searchController.dispose();
+    _minAmountController.dispose();
+    _maxAmountController.dispose();
+    super.dispose();
+  }
+}

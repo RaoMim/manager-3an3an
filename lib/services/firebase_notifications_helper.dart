@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:http/http.dart' as http;
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/order.dart';
 import '../firebase_options.dart';
 import 'permission_service.dart';
@@ -18,12 +19,10 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   }
   
-  if (kDebugMode) {
-    print("Background FCM message received:");
-    print("Title: ${message.notification?.title}");
-    print("Body: ${message.notification?.body}");
-    print("Data: ${message.data}");
-  }
+  print("Background FCM message received:");
+  print("Title: ${message.notification?.title}");
+  print("Body: ${message.notification?.body}");
+  print("Data: ${message.data}");
   
   // Handle background notification processing here if needed
   // For example, update local storage, play sound, etc.
@@ -48,36 +47,81 @@ class FirebaseNotificationsHelper {
   /// Initialize Firebase and FCM
   Future<void> initializeFCM() async {
     try {
+      print("🚀 Starting Firebase FCM initialization...");
+
+      // Check if Firebase is already initialized
+      print("   🔍 Checking Firebase initialization status...");
+      print("   📊 Firebase apps count: ${Firebase.apps.length}");
+      
       if (Firebase.apps.isEmpty) {
-        await Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform,
-        );
+        print("   📱 No Firebase apps found, initializing...");
+        try {
+          await Firebase.initializeApp(
+            options: DefaultFirebaseOptions.currentPlatform,
+          );
+          print("   ✅ Firebase app initialized successfully");
+        } catch (e) {
+          if (e.toString().contains('duplicate-app')) {
+            print("   ✅ Firebase already initialized (race condition resolved)");
+          } else {
+            rethrow;
+          }
+        }
+      } else {
+        print("   ✅ Firebase already initialized with ${Firebase.apps.length} apps");
+        print("   📱 Default app name: ${Firebase.app().name}");
       }
 
       _messaging = FirebaseMessaging.instance;
+      print("   📨 Firebase Messaging instance obtained");
 
       // Set background message handler
       FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+      print("   🔧 Background message handler set");
 
       // Request notification permissions
+      if (true) {
+        print("   🔐 Requesting notification permissions...");
+      }
       await _requestPermissions();
 
       // Get and store FCM token
+      if (true) {
+        print("   🔑 Generating FCM token...");
+      }
       await _getFCMToken();
 
       // Subscribe to manager topic
+      if (true) {
+        print("   📢 Subscribing to manager topic...");
+      }
       await _subscribeToManagerTopic();
 
       // Setup message handlers
+      if (true) {
+        print("   📥 Setting up message handlers...");
+      }
       _setupMessageHandlers();
 
-      if (kDebugMode) {
-        print("Firebase FCM initialized successfully for managers");
+      // Perform intelligent token refresh analysis
+      if (true) {
+        print("   🧠 Running intelligent token refresh analysis...");
+      }
+      await performIntelligentTokenRefresh();
+
+      if (true) {
+        print("✅ Firebase FCM initialized successfully for managers");
+        print("   📊 Final status:");
+        print("   - FCM Token: ${_fcmToken != null ? 'Generated' : 'Missing'}");
+        print("   - Messaging: ${_messaging != null ? 'Ready' : 'Not Ready'}");
       }
     } catch (e) {
-      if (kDebugMode) {
-        print("Error initializing FCM: $e");
-      }
+      print("🔴 Error initializing FCM: $e");
+      print("   🔍 Check Firebase configuration files");
+      print("   📱 Platform: ${Platform.operatingSystem}");
+      print("   🔧 Error type: ${e.runtimeType}");
+      print("   📄 Stack trace: ${StackTrace.current}");
+      rethrow; // Re-throw to see the error in main()
     }
   }
 
@@ -89,7 +133,7 @@ class FirebaseNotificationsHelper {
       // First request permission through permission_handler for Android 13+
       final permissionStatus = await PermissionService().requestNotificationPermission();
       
-      if (kDebugMode) {
+      if (true) {
         print('Permission handler notification status: $permissionStatus');
       }
 
@@ -104,7 +148,7 @@ class FirebaseNotificationsHelper {
         sound: true,
       );
 
-      if (kDebugMode) {
+      if (true) {
         print('Firebase notification permission status: ${settings.authorizationStatus}');
       }
 
@@ -122,7 +166,7 @@ class FirebaseNotificationsHelper {
         await _createNotificationChannel();
       }
     } catch (e) {
-      if (kDebugMode) {
+      if (true) {
         print('Error requesting notification permissions: $e');
       }
     }
@@ -132,47 +176,182 @@ class FirebaseNotificationsHelper {
   Future<void> _createNotificationChannel() async {
     // This would typically use flutter_local_notifications
     // For now, we rely on Firebase's default channel creation
-    if (kDebugMode) {
+    if (true) {
       print('Notification channel creation handled by Firebase');
     }
   }
 
-  /// Get FCM token
+  /// Get FCM token with persistence
   Future<String?> _getFCMToken() async {
     if (_messaging == null) {
-      if (kDebugMode) {
-        print("ERROR: Firebase messaging is null");
+      if (true) {
+        print("🔴 ERROR: Firebase messaging is null");
       }
       return null;
     }
 
     try {
-      _fcmToken = await _messaging!.getToken();
+      // First try to load cached token from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final cachedToken = prefs.getString('fcm_token');
+      final tokenTimestamp = prefs.getInt('fcm_token_timestamp') ?? 0;
+      final now = DateTime.now().millisecondsSinceEpoch;
       
-      if (kDebugMode) {
-        if (_fcmToken != null) {
-          print("FCM Token generated successfully (${_fcmToken!.length} chars)");
+      // Check if cached token is still valid (less than 270 days old - FCM maximum)
+      // Firebase recommends monthly refresh, but tokens are valid up to 270 days
+      const tokenValidityDuration = 270 * 24 * 60 * 60 * 1000; // 270 days in milliseconds
+      const recommendedRefreshDuration = 30 * 24 * 60 * 60 * 1000; // 30 days for optimal performance
+      final isTokenValid = cachedToken != null && 
+                          cachedToken.isNotEmpty && 
+                          (now - tokenTimestamp) < tokenValidityDuration;
+      final isTokenRecommendedFresh = (now - tokenTimestamp) < recommendedRefreshDuration;
+      final tokenAgeDays = ((now - tokenTimestamp) / (24 * 60 * 60 * 1000));
+      
+      if (isTokenValid) {
+        _fcmToken = cachedToken;
+        if (true) {
+          print("✅ Using cached FCM token (${tokenAgeDays.round()} days old)");
+          print("   🔑 Token preview: ${_fcmToken!.substring(0, 50)}...");
+          print("   📊 Status: ${isTokenRecommendedFresh ? 'FRESH' : 'STALE (but valid)'} - ${isTokenRecommendedFresh ? 'Optimal' : 'Consider refresh soon'}");
+          print("   ⏰ Valid until: ${tokenAgeDays.round()}/270 days");
+        }
+        
+        // Schedule proactive refresh if token is stale but valid (30+ days old)
+        if (!isTokenRecommendedFresh) {
+          if (true) {
+            print("   🔄 Token is stale (${tokenAgeDays.round()} days), scheduling proactive refresh...");
+          }
+          // Refresh token in background without blocking current usage
+          _scheduleProactiveTokenRefresh();
+        }
+        
+        // Still set up token refresh listener
+        _setupTokenRefreshListener();
+        return _fcmToken;
+      }
+      
+      if (true) {
+        print("🔄 Requesting new FCM token from Firebase...");
+        if (cachedToken != null) {
+          print("   ♻️  Cached token expired (${tokenAgeDays.round()} days > 270 days), generating new one");
         } else {
-          print("WARNING: FCM token is null");
+          print("   🆕 No cached token found, generating first token");
         }
       }
       
-      // Listen for token refresh
-      _messaging!.onTokenRefresh.listen((String token) {
-        _fcmToken = token;
-        if (kDebugMode) {
-          print("FCM Token refreshed");
+      _fcmToken = await _messaging!.getToken();
+      
+      if (_fcmToken != null) {
+        // Store token and timestamp in SharedPreferences
+        await prefs.setString('fcm_token', _fcmToken!);
+        await prefs.setInt('fcm_token_timestamp', now);
+        
+        if (true) {
+          print("✅ FCM Token generated and cached successfully");
+          print("   📄 Token length: ${_fcmToken!.length} characters");
+          print("   🔑 Token preview: ${_fcmToken!.substring(0, 50)}...");
+          print("   💾 Token cached for 270 days (FCM maximum validity)");
         }
-        // You might want to send this token to your backend here
-      });
+      } else {
+        if (true) {
+          print("⚠️  WARNING: FCM token is null");
+          print("   🔍 Check Firebase configuration and Google Services");
+        }
+      }
+      
+      // Set up token refresh listener
+      _setupTokenRefreshListener();
 
       return _fcmToken;
     } catch (e) {
-      if (kDebugMode) {
-        print("ERROR getting FCM token: $e");
+      if (true) {
+        print("🔴 ERROR getting FCM token: $e");
+        print("   📱 Platform: ${Platform.operatingSystem}");
+        print("   🔧 Check Firebase setup and internet connection");
       }
       return null;
     }
+  }
+
+  /// Setup token refresh listener with persistence
+  void _setupTokenRefreshListener() {
+    _messaging!.onTokenRefresh.listen((String token) async {
+      _fcmToken = token;
+      
+      // Update cached token and timestamp
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('fcm_token', token);
+        await prefs.setInt('fcm_token_timestamp', DateTime.now().millisecondsSinceEpoch);
+        
+        if (true) {
+          print("🔄 FCM Token refreshed and cached");
+          print("   🔑 New token preview: ${token.substring(0, 50)}...");
+        }
+        
+        // Auto-register refreshed token with backend if user is logged in
+        final authToken = prefs.getString('auth_token');
+        if (authToken != null && authToken.isNotEmpty) {
+          if (true) {
+            print("   🔄 Auto-registering refreshed token with backend");
+          }
+          await sendTokenToBackend(authToken);
+        }
+      } catch (e) {
+        if (true) {
+          print("🔴 Error caching refreshed token: $e");
+        }
+      }
+    });
+  }
+
+  /// Schedule proactive token refresh for stale but valid tokens
+  Future<void> _scheduleProactiveTokenRefresh() async {
+    // Use Future.delayed to refresh token in background without blocking UI
+    Future.delayed(const Duration(seconds: 5), () async {
+      try {
+        if (true) {
+          print("🔄 Performing proactive token refresh in background...");
+        }
+        
+        // Get fresh token without clearing cache (in case refresh fails)
+        final freshToken = await _messaging?.getToken();
+        
+        if (freshToken != null && freshToken != _fcmToken) {
+          // Update token and cache
+          _fcmToken = freshToken;
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('fcm_token', freshToken);
+          await prefs.setInt('fcm_token_timestamp', DateTime.now().millisecondsSinceEpoch);
+          
+          if (true) {
+            print("✅ Proactive token refresh completed successfully");
+            print("   🔑 New token preview: ${freshToken.substring(0, 50)}...");
+          }
+          
+          // Auto-register with backend if user is logged in
+          final authToken = prefs.getString('auth_token');
+          if (authToken != null && authToken.isNotEmpty) {
+            if (true) {
+              print("   🔄 Auto-registering refreshed token with backend");
+            }
+            await sendTokenToBackend(authToken);
+          }
+        } else if (freshToken == _fcmToken) {
+          if (true) {
+            print("✅ Proactive refresh: Token unchanged, updating timestamp only");
+          }
+          // Update timestamp to reset staleness
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setInt('fcm_token_timestamp', DateTime.now().millisecondsSinceEpoch);
+        }
+      } catch (e) {
+        if (true) {
+          print("🔴 Error during proactive token refresh: $e");
+          print("   📝 Current token will continue working until expiry");
+        }
+      }
+    });
   }
 
   /// Subscribe to manager topic
@@ -181,11 +360,11 @@ class FirebaseNotificationsHelper {
 
     try {
       await _messaging!.subscribeToTopic(managerTopic);
-      if (kDebugMode) {
+      if (true) {
         print("Subscribed to '$managerTopic' topic");
       }
     } catch (e) {
-      if (kDebugMode) {
+      if (true) {
         print("Error subscribing to $managerTopic topic: $e");
       }
     }
@@ -197,11 +376,11 @@ class FirebaseNotificationsHelper {
 
     try {
       await _messaging!.unsubscribeFromTopic(managerTopic);
-      if (kDebugMode) {
+      if (true) {
         print("Unsubscribed from '$managerTopic' topic");
       }
     } catch (e) {
-      if (kDebugMode) {
+      if (true) {
         print("Error unsubscribing from $managerTopic topic: $e");
       }
     }
@@ -213,7 +392,7 @@ class FirebaseNotificationsHelper {
 
     // Handle messages when app is in foreground
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      if (kDebugMode) {
+      if (true) {
         print("Foreground message received:");
         print("Title: ${message.notification?.title}");
         print("Body: ${message.notification?.body}");
@@ -225,7 +404,7 @@ class FirebaseNotificationsHelper {
 
     // Handle messages when app is opened from background
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      if (kDebugMode) {
+      if (true) {
         print("Message opened app from background:");
         print("Data: ${message.data}");
       }
@@ -255,7 +434,7 @@ class FirebaseNotificationsHelper {
 
   /// Handle messages that opened the app from background
   void _handleMessageOpenedApp(RemoteMessage message) {
-    if (kDebugMode) {
+    if (true) {
       print("Handling message that opened app: ${message.data}");
     }
 
@@ -271,7 +450,7 @@ class FirebaseNotificationsHelper {
 
     RemoteMessage? initialMessage = await _messaging!.getInitialMessage();
     if (initialMessage != null) {
-      if (kDebugMode) {
+      if (true) {
         print("App opened from terminated state with message: ${initialMessage.data}");
       }
       _handleMessageOpenedApp(initialMessage);
@@ -290,7 +469,7 @@ class FirebaseNotificationsHelper {
         } else if (orderData is Map<String, dynamic>) {
           orderJson = orderData;
         } else {
-          if (kDebugMode) {
+          if (true) {
             print("Invalid order data format: $orderData");
           }
           return;
@@ -298,7 +477,7 @@ class FirebaseNotificationsHelper {
 
         final order = Order.fromJson(orderJson);
         
-        if (kDebugMode) {
+        if (true) {
           print("New order notification: ID ${order.id}, Client: ${order.clientName}");
         }
 
@@ -308,7 +487,7 @@ class FirebaseNotificationsHelper {
         }
       }
     } catch (e) {
-      if (kDebugMode) {
+      if (true) {
         print("Error processing order notification: $e");
       }
     }
@@ -321,11 +500,11 @@ class FirebaseNotificationsHelper {
       const String soundUrl = 'https://assets.mixkit.co/active_storage/sfx/933/933-preview.mp3';
       await _audioPlayer.play(UrlSource(soundUrl));
       
-      if (kDebugMode) {
+      if (true) {
         print('Playing notification sound');
       }
     } catch (e) {
-      if (kDebugMode) {
+      if (true) {
         print('Error playing notification sound: $e');
       }
     }
@@ -383,62 +562,130 @@ class FirebaseNotificationsHelper {
 
   /// Send FCM token to backend (call this after successful login)
   Future<void> sendTokenToBackend(String authToken) async {
+    if (true) {
+      print("📤 sendTokenToBackend called");
+      print("   🔑 Auth token preview: ${authToken.substring(0, 30)}...");
+      print("   📱 FCM token status: ${_fcmToken == null ? 'NULL' : 'Available (${_fcmToken!.length} chars)'}");
+    }
+
     if (_fcmToken == null) {
-      if (kDebugMode) {
-        print("WARNING: FCM token is null, cannot send to backend");
+      if (true) {
+        print("⚠️  WARNING: FCM token is null, cannot send to backend");
+        print("   🔧 Attempting to regenerate token...");
       }
-      return;
+      
+      // Try to get token again
+      await _getFCMToken();
+      
+      if (_fcmToken == null) {
+        if (true) {
+          print("🔴 ERROR: Still no FCM token available after retry");
+        }
+        return;
+      }
     }
 
     try {
-      if (kDebugMode) {
-        print("Sending FCM token to backend...");
-        print("Platform: ${Platform.isIOS ? 'ios' : 'android'}");
+      if (true) {
+        print("📤 Sending FCM token to backend...");
+        print("   🌐 Endpoint: https://akl.3an3an.ma/api/Notification/manager/register-token");
+        print("   📱 Platform: ${Platform.isIOS ? 'ios' : 'android'}");
+        print("   🔑 Token preview: ${_fcmToken!.substring(0, 50)}...");
       }
       
-      final response = await http.put(
-        Uri.parse('https://akl.3an3an.ma/api/Manager/fcm-token'),
+      final requestBody = {
+        'token': _fcmToken,
+        'deviceInfo': Platform.isIOS ? 'ios' : 'android',
+      };
+      
+      final response = await http.post(
+        Uri.parse('https://akl.3an3an.ma/api/Notification/manager/register-token'),
+        headers: {
+          'Authorization': 'Bearer $authToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(requestBody),
+      );
+
+      if (true) {
+        print("📨 Server response received:");
+        print("   📊 Status code: ${response.statusCode}");
+        print("   📄 Response body: ${response.body}");
+      }
+
+      if (response.statusCode == 200) {
+        if (true) {
+          print("✅ SUCCESS: FCM token sent successfully to backend");
+        }
+      } else {
+        if (true) {
+          print("🔴 FAILED to send FCM token:");
+          print("   📊 Status: ${response.statusCode}");
+          print("   📄 Response: ${response.body}");
+        }
+      }
+    } catch (e) {
+      if (true) {
+        print("🔴 ERROR sending FCM token to backend: $e");
+        print("   🔍 Check network connection and API endpoint");
+      }
+    }
+  }
+
+  /// Remove FCM token from backend and clear cache (call this on logout)
+  Future<void> removeTokenFromBackend(String authToken) async {
+    if (_fcmToken == null) return;
+
+    try {
+      if (true) {
+        print("Removing FCM token from backend...");
+      }
+      
+      final response = await http.post(
+        Uri.parse('https://akl.3an3an.ma/api/Notification/manager/unregister-token'),
         headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
           'token': _fcmToken,
-          'platform': Platform.isIOS ? 'ios' : 'android',
-          'deviceInfo': Platform.operatingSystem,
         }),
       );
 
       if (response.statusCode == 200) {
-        if (kDebugMode) {
-          print("SUCCESS: FCM token sent successfully to backend");
+        if (true) {
+          print("SUCCESS: FCM token removed successfully from backend");
         }
       } else {
-        if (kDebugMode) {
-          print("FAILED to send FCM token: ${response.statusCode} - ${response.body}");
+        if (true) {
+          print("FAILED to remove FCM token: ${response.statusCode} - ${response.body}");
         }
       }
+      
+      // Clear cached token and reset memory token
+      await _clearCachedToken();
+      
     } catch (e) {
-      if (kDebugMode) {
-        print("ERROR sending FCM token to backend: $e");
+      if (true) {
+        print("Error removing FCM token from backend: $e");
       }
     }
   }
 
-  /// Remove FCM token from backend (call this on logout)
-  Future<void> removeTokenFromBackend(String authToken) async {
-    if (_fcmToken == null) return;
-
+  /// Clear cached FCM token from SharedPreferences
+  Future<void> _clearCachedToken() async {
     try {
-      // TODO: Implement API call to remove FCM token from backend
-      // This should be called on logout
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('fcm_token');
+      await prefs.remove('fcm_token_timestamp');
+      _fcmToken = null;
       
-      if (kDebugMode) {
-        print("FCM token should be removed from backend: $_fcmToken");
+      if (true) {
+        print("🗑️ Cached FCM token cleared");
       }
     } catch (e) {
-      if (kDebugMode) {
-        print("Error removing FCM token from backend: $e");
+      if (true) {
+        print("🔴 Error clearing cached token: $e");
       }
     }
   }
@@ -450,7 +697,7 @@ class FirebaseNotificationsHelper {
       final hasPermission = await PermissionService().isPermissionGranted(Permission.notification);
       
       if (hasPermission) {
-        if (kDebugMode) {
+        if (true) {
           print('Notification permissions already granted');
         }
         return true;
@@ -459,7 +706,7 @@ class FirebaseNotificationsHelper {
       // Request permissions with proper UI flow
       return await PermissionService().handleNotificationPermission(context);
     } catch (e) {
-      if (kDebugMode) {
+      if (true) {
         print('Error checking notification permissions: $e');
       }
       return false;
@@ -473,7 +720,7 @@ class FirebaseNotificationsHelper {
       final hasPermissions = await checkAndRequestPermissions(context);
       
       if (!hasPermissions) {
-        if (kDebugMode) {
+        if (true) {
           print('FCM initialization aborted: permissions not granted');
         }
         return false;
@@ -482,13 +729,13 @@ class FirebaseNotificationsHelper {
       // Initialize FCM
       await initializeFCM();
       
-      if (kDebugMode) {
+      if (true) {
         print('FCM initialized successfully with permissions');
       }
       
       return true;
     } catch (e) {
-      if (kDebugMode) {
+      if (true) {
         print('Error initializing FCM with context: $e');
       }
       return false;
@@ -503,10 +750,218 @@ class FirebaseNotificationsHelper {
       
       return hasPermission && hasToken;
     } catch (e) {
-      if (kDebugMode) {
+      if (true) {
         print('Error checking FCM setup: $e');
       }
       return false;
+    }
+  }
+
+  /// Debug function to check current FCM status
+  Future<void> debugFCMStatus() async {
+    if (true) {
+      print('\n🔍 === FCM DEBUG STATUS ===');
+      print('📱 FCM Token: ${_fcmToken != null ? 'Available (${_fcmToken!.length} chars)' : 'NULL'}');
+      print('📨 Messaging Instance: ${_messaging != null ? 'Ready' : 'Not Ready'}');
+      if (_fcmToken != null) {
+        print('🔑 Token Preview: ${_fcmToken!.substring(0, 50)}...');
+      }
+      
+      // Check cached token info
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final cachedToken = prefs.getString('fcm_token');
+        final tokenTimestamp = prefs.getInt('fcm_token_timestamp') ?? 0;
+        final now = DateTime.now().millisecondsSinceEpoch;
+        
+        if (cachedToken != null) {
+          final ageInDays = ((now - tokenTimestamp) / (24 * 60 * 60 * 1000));
+          final isValid = ageInDays < 270;
+          final isFresh = ageInDays < 30;
+          
+          print('💾 Cached Token: Available (age: ${ageInDays.toStringAsFixed(1)} days)');
+          print('🔑 Cached Token Preview: ${cachedToken.substring(0, 50)}...');
+          print('⏰ Token Status: ${isValid ? (isFresh ? 'FRESH & VALID' : 'STALE but VALID') : 'EXPIRED'}');
+          print('📊 Validity: ${ageInDays.toStringAsFixed(1)}/270 days (${isFresh ? 'Optimal' : isValid ? 'Needs refresh soon' : 'Must refresh'})');
+        } else {
+          print('💾 Cached Token: Not Found');
+        }
+      } catch (e) {
+        print('🔴 Error reading cached token: $e');
+      }
+      
+      print('=========================\n');
+    }
+  }
+
+  /// Force refresh FCM token (useful for testing)
+  Future<void> forceRefreshToken() async {
+    if (_messaging == null) {
+      print('🔴 Cannot refresh token: messaging not initialized');
+      return;
+    }
+    
+    try {
+      if (true) {
+        print('🔄 Forcing FCM token refresh...');
+      }
+      
+      // Clear cached token first
+      await _clearCachedToken();
+      
+      // Get new token
+      await _getFCMToken();
+      
+      if (true) {
+        print('✅ Token refresh completed');
+      }
+    } catch (e) {
+      if (true) {
+        print('🔴 Error forcing token refresh: $e');
+      }
+    }
+  }
+
+  /// Test FCM token registration with current stored auth token
+  Future<void> testTokenRegistration() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final authToken = prefs.getString('auth_token');
+      
+      if (authToken == null) {
+        if (true) {
+          print('❌ No auth token found in storage');
+        }
+        return;
+      }
+      
+      if (true) {
+        print('🧪 Testing FCM token registration...');
+        print('   🔑 Auth token available: Yes');
+      }
+      
+      await sendTokenToBackend(authToken);
+      
+    } catch (e) {
+      if (true) {
+        print('🔴 Error testing token registration: $e');
+      }
+    }
+  }
+
+  /// Validate token health with backend
+  Future<bool> validateTokenWithBackend() async {
+    if (_fcmToken == null) {
+      if (true) {
+        print('⚠️ Cannot validate token: no FCM token available');
+      }
+      return false;
+    }
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final authToken = prefs.getString('auth_token');
+      
+      if (authToken == null) {
+        if (true) {
+          print('⚠️ Cannot validate token: no auth token available');
+        }
+        return false;
+      }
+
+      if (true) {
+        print('🔍 Validating FCM token health with backend...');
+      }
+
+      final response = await http.post(
+        Uri.parse('https://akl.3an3an.ma/api/Notification/manager/validate-token'),
+        headers: {
+          'Authorization': 'Bearer $authToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'token': _fcmToken,
+        }),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        if (true) {
+          print('✅ Token validation successful: token is healthy');
+        }
+        return true;
+      } else if (response.statusCode == 400 || response.statusCode == 410) {
+        if (true) {
+          print('❌ Token validation failed: token is invalid/expired');
+          print('   🔄 Will force refresh token...');
+        }
+        // Token is invalid, force refresh
+        await forceRefreshToken();
+        return false;
+      } else {
+        if (true) {
+          print('⚠️ Token validation inconclusive: ${response.statusCode}');
+        }
+        return true; // Assume valid if server error
+      }
+    } catch (e) {
+      if (true) {
+        print('🔴 Error validating token: $e');
+        print('   📝 Assuming token is valid (network/server issue)');
+      }
+      return true; // Assume valid on network errors
+    }
+  }
+
+  /// Intelligent token refresh based on age and backend validation
+  Future<void> performIntelligentTokenRefresh({bool forceValidation = false}) async {
+    try {
+      if (true) {
+        print('🧠 Performing intelligent token refresh analysis...');
+      }
+
+      final prefs = await SharedPreferences.getInstance();
+      final tokenTimestamp = prefs.getInt('fcm_token_timestamp') ?? 0;
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final tokenAgeDays = ((now - tokenTimestamp) / (24 * 60 * 60 * 1000));
+
+      if (true) {
+        print('   📊 Token age: ${tokenAgeDays.toStringAsFixed(1)} days');
+      }
+
+      // Strategy based on token age
+      if (tokenAgeDays >= 270) {
+        // Token expired, must refresh
+        if (true) {
+          print('   🔴 Token expired (≥270 days), forcing refresh...');
+        }
+        await forceRefreshToken();
+      } else if (tokenAgeDays >= 60 || forceValidation) {
+        // Token is old (60+ days), validate with backend
+        if (true) {
+          print('   🔍 Token is aging (${tokenAgeDays.toStringAsFixed(1)} days), validating with backend...');
+        }
+        final isValid = await validateTokenWithBackend();
+        if (!isValid) {
+          if (true) {
+            print('   🔄 Backend validation failed, token was refreshed');
+          }
+        }
+      } else if (tokenAgeDays >= 30) {
+        // Token is stale but likely valid, proactive refresh
+        if (true) {
+          print('   ⚠️ Token is stale (${tokenAgeDays.toStringAsFixed(1)} days), scheduling proactive refresh...');
+        }
+        _scheduleProactiveTokenRefresh();
+      } else {
+        // Token is fresh
+        if (true) {
+          print('   ✅ Token is fresh (${tokenAgeDays.toStringAsFixed(1)} days), no action needed');
+        }
+      }
+    } catch (e) {
+      if (true) {
+        print('🔴 Error in intelligent token refresh: $e');
+      }
     }
   }
 }

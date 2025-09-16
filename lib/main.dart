@@ -12,8 +12,7 @@ import 'models/order.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Firebase and FCM (without context, basic setup only)
-  await FirebaseNotificationsHelper().initializeFCM();
+  print("🚀 MAIN: App starting, Firebase will be initialized later...");
   
   runApp(const Manager3an3anApp());
 }
